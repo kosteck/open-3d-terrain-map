@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 
 <head>
     <meta charset="utf-8" />
@@ -9,6 +9,9 @@
     <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
     <script src="https://unpkg.com/maplibre-contour@0.0.5/dist/index.min.js"></script>
+    <!-- Icon subset: icon_names must stay alphabetically sorted or Google Fonts rejects the request. -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=add_road,anchor,block,close,contrast,directions_bike,downhill_skiing,hiking,label,line_curve,map,pedal_bike,satellite_alt,search,terrain,train,translate&display=block" />
     <style>
         html,
         body {
@@ -23,17 +26,84 @@
             inset: 0;
         }
 
-        #layer-panel {
+        #side-panel {
             position: absolute;
             top: 10px;
             left: 10px;
             z-index: 2;
-            background: rgba(255, 255, 255, 0.95);
+            width: 264px;
+            max-width: calc(100vw - 70px);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .panel-card {
+            background: rgba(255, 255, 255, 0.96);
             border-radius: 6px;
             box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
-            max-width: calc(100vw - 80px);
         }
+
+        /* --- Search --- */
+
+        #search-form {
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        #search-input {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            outline: none;
+            font: inherit;
+            padding: 6px 8px;
+            background: transparent;
+        }
+
+        #search-results {
+            list-style: none;
+            margin: 0;
+            padding: 4px 0;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        #search-results:empty {
+            display: none;
+        }
+
+        #search-results li button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: 0;
+            background: transparent;
+            font: inherit;
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        #search-results li button:hover,
+        #search-results li button[aria-current="true"] {
+            background: #e8f0fe;
+        }
+
+        #search-results .result-type {
+            display: block;
+            font-size: 11px;
+            color: #666;
+        }
+
+        #search-results .search-message {
+            padding: 6px 10px;
+            color: #666;
+        }
+
+        /* --- Layer panel --- */
 
         #layer-panel summary {
             cursor: pointer;
@@ -48,8 +118,9 @@
 
         #layer-panel fieldset {
             border: 0;
-            margin: 0 0 8px;
+            margin: 0 0 10px;
             padding: 0;
+            min-width: 0;
         }
 
         #layer-panel legend {
@@ -59,14 +130,90 @@
             letter-spacing: 0.04em;
             color: #555;
             padding: 0;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
-        #layer-panel label {
-            display: block;
-            padding: 3px 0;
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .icon-button {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 1px solid #c9ccd1;
+            border-radius: 6px;
+            background: #fff;
+            color: #333;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+        }
+
+        .icon-button:hover {
+            border-color: #1a73e8;
+        }
+
+        .icon-button[aria-pressed="true"] {
+            background: #1a73e8;
+            border-color: #1a73e8;
+            color: #fff;
+        }
+
+        .icon-button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .icon-button .material-symbols-outlined {
+            font-size: 22px;
+        }
+
+        #search-form .icon-button {
+            border-color: transparent;
+        }
+
+        /* Tooltip from aria-label, so the visible hint and the accessible name never drift apart. */
+        .icon-button[aria-label]:hover::after,
+        .icon-button[aria-label]:focus-visible::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            z-index: 10;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(32, 33, 36, 0.92);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.3;
             white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* Touch screens have no hover; a tooltip stuck after a tap would only cover the map. */
+        @media (hover: none) {
+            .icon-button[aria-label]:hover::after {
+                content: none;
+            }
+        }
+
+        #rail-style {
+            margin-top: 6px;
+            width: 100%;
+            font: inherit;
+            font-size: 13px;
+            padding: 4px;
+        }
+
+        #rail-style[hidden] {
+            display: none;
         }
 
         #layer-panel input[type="range"] {
@@ -89,8 +236,27 @@
             font-size: 12px;
             color: #666;
             margin: 6px 0 0;
-            max-width: 220px;
-            white-space: normal;
+        }
+
+        .panel-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        #language-toggle {
+            width: auto;
+            padding: 0 8px;
+            gap: 4px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        #language-toggle::after {
+            left: auto;
+            right: 0;
         }
     </style>
 </head>
@@ -98,40 +264,276 @@
 <body>
     <div id="map"></div>
 
-    <details id="layer-panel" open>
-        <summary>Warstwy</summary>
-        <div class="panel-body">
-            <fieldset>
-                <legend>Mapa bazowa</legend>
-                <label><input type="radio" name="base" value="osm" checked> OpenStreetMap</label>
-                <label><input type="radio" name="base" value="aerial"> Zdjęcia lotnicze</label>
-                <label><input type="radio" name="base" value="opentopomap"> OpenTopoMap</label>
-                <label><input type="radio" name="base" value="openrailwaymap"> OpenRailwayMap</label>
-                <label><input type="radio" name="base" value="none"> Brak</label>
-            </fieldset>
-            <fieldset>
-                <legend>Nakładka wysokościowa</legend>
-                <label><input type="radio" name="relief" value="hillshade"> Cieniowanie</label>
-                <label><input type="radio" name="relief" value="contours"> Poziomice</label>
-                <label><input type="radio" name="relief" value="both" checked> Oba</label>
-                <label><input type="radio" name="relief" value="none"> Brak</label>
-            </fieldset>
-            <fieldset id="contour-density-fieldset">
-                <legend>Gęstość poziomic</legend>
-                <input type="range" id="contour-density" min="1" max="5" step="1" value="3"
-                    aria-describedby="contour-interval-info">
-                <div class="range-labels"><span>rzadziej</span><span>gęściej</span></div>
-                <div id="contour-interval-info" class="hint"></div>
-            </fieldset>
-            <p class="hint">Obrót / pochylenie: prawy przycisk myszy lub Ctrl + przeciąganie. Przycisk ⛰ po prawej włącza/wyłącza 3D.</p>
+    <div id="side-panel">
+        <div class="panel-card">
+            <form id="search-form" role="search">
+                <input id="search-input" type="search" autocomplete="off" spellcheck="false">
+                <button type="submit" class="icon-button" id="search-button">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                </button>
+            </form>
+            <ul id="search-results" aria-live="polite"></ul>
         </div>
-    </details>
+
+        <details id="layer-panel" class="panel-card" open>
+            <summary data-i18n="panelTitle"></summary>
+            <div class="panel-body">
+                <fieldset>
+                    <legend data-i18n="sectionBase"></legend>
+                    <div class="button-row" id="base-buttons"></div>
+                </fieldset>
+                <fieldset>
+                    <legend data-i18n="sectionOverlays"></legend>
+                    <div class="button-row" id="overlay-buttons"></div>
+                    <select id="rail-style" hidden></select>
+                </fieldset>
+                <fieldset>
+                    <legend data-i18n="sectionTerrain"></legend>
+                    <div class="button-row" id="terrain-buttons"></div>
+                </fieldset>
+                <fieldset id="contour-density-fieldset">
+                    <legend data-i18n="densityLabel"></legend>
+                    <input type="range" id="contour-density" min="1" max="5" step="1" value="3"
+                        aria-describedby="contour-interval-info">
+                    <div class="range-labels"><span data-i18n="sparser"></span><span data-i18n="denser"></span></div>
+                    <div id="contour-interval-info" class="hint"></div>
+                </fieldset>
+                <div class="panel-footer">
+                    <p class="hint" data-i18n="navigationHint"></p>
+                    <button type="button" class="icon-button" id="language-toggle">
+                        <span class="material-symbols-outlined" aria-hidden="true">translate</span>
+                        <span id="language-toggle-label"></span>
+                    </button>
+                </div>
+            </div>
+        </details>
+    </div>
 
     <script type="text/javascript">
-        const OSM_ATTRIBUTION = '<a href="https://www.openstreetmap.org/copyright">&copy; OpenStreetMap Contributors</a>';
+        // --- Translations (EN default; PL when the browser's preferred language is Polish) ---
 
-        const BASE_MAP_IDS = ['osm', 'aerial', 'opentopomap', 'openrailwaymap', 'none'];
-        const RELIEF_MODES = ['hillshade', 'contours', 'both', 'none'];
+        const TRANSLATIONS = {
+            en: {
+                panelTitle: 'Layers',
+                sectionBase: 'Base map',
+                sectionOverlays: 'Overlays',
+                sectionTerrain: 'Terrain',
+                'base.osm': 'OpenStreetMap',
+                'base.aerial': 'Aerial imagery (Esri)',
+                'base.opentopomap': 'OpenTopoMap (topographic)',
+                'base.none': 'No base map',
+                'overlay.roads': 'Roads (Esri)',
+                'overlay.rail': 'Railways (OpenRailwayMap)',
+                'overlay.hiking': 'Hiking trails',
+                'overlay.cycling': 'Cycling routes',
+                'overlay.mtb': 'Mountain bike trails',
+                'overlay.ski': 'Ski pistes (OpenSnowMap)',
+                'overlay.seamarks': 'Sea marks (OpenSeaMap)',
+                'overlay.labels': 'Place names and borders (Esri)',
+                railStyleLabel: 'Railway map style',
+                'railStyle.standard': 'Railways: infrastructure',
+                'railStyle.maxspeed': 'Railways: max speed',
+                'railStyle.signals': 'Railways: signalling',
+                'railStyle.electrification': 'Railways: electrification',
+                'terrain.hillshade': 'Hillshade',
+                'terrain.contours': 'Contour lines',
+                densityLabel: 'Contour density',
+                sparser: 'sparser',
+                denser: 'denser',
+                contourInterval: (minor, major) => `At view centre: every ${minor} m, bold every ${major} m`,
+                contourBelowMinZoom: 'Contour lines appear from zoom 10',
+                navigationHint: 'Rotate / tilt: right mouse button or Ctrl + drag. The ⛰ button toggles 3D.',
+                searchPlaceholder: 'Search place, region, country…',
+                searchButton: 'Search (OpenStreetMap Nominatim)',
+                searchNoResults: 'Nothing found',
+                searchFailed: 'Search failed, please try again',
+                searchCoordinates: 'Coordinates',
+                languageToggleLabel: 'PL',
+                languageToggleTooltip: 'Przełącz na polski'
+            },
+            pl: {
+                panelTitle: 'Warstwy',
+                sectionBase: 'Mapa bazowa',
+                sectionOverlays: 'Nakładki',
+                sectionTerrain: 'Ukształtowanie terenu',
+                'base.osm': 'OpenStreetMap',
+                'base.aerial': 'Zdjęcia lotnicze (Esri)',
+                'base.opentopomap': 'OpenTopoMap (topograficzna)',
+                'base.none': 'Bez mapy bazowej',
+                'overlay.roads': 'Drogi (Esri)',
+                'overlay.rail': 'Koleje (OpenRailwayMap)',
+                'overlay.hiking': 'Szlaki piesze',
+                'overlay.cycling': 'Szlaki rowerowe',
+                'overlay.mtb': 'Szlaki MTB',
+                'overlay.ski': 'Trasy narciarskie (OpenSnowMap)',
+                'overlay.seamarks': 'Znaki nawigacyjne (OpenSeaMap)',
+                'overlay.labels': 'Nazwy miejscowości i granice (Esri)',
+                railStyleLabel: 'Styl mapy kolejowej',
+                'railStyle.standard': 'Koleje: infrastruktura',
+                'railStyle.maxspeed': 'Koleje: prędkości maksymalne',
+                'railStyle.signals': 'Koleje: sygnalizacja',
+                'railStyle.electrification': 'Koleje: elektryfikacja',
+                'terrain.hillshade': 'Cieniowanie',
+                'terrain.contours': 'Poziomice',
+                densityLabel: 'Gęstość poziomic',
+                sparser: 'rzadziej',
+                denser: 'gęściej',
+                contourInterval: (minor, major) => `W środku widoku: co ${minor} m, pogrubione co ${major} m`,
+                contourBelowMinZoom: 'Poziomice widoczne od zoomu 10',
+                navigationHint: 'Obrót / pochylenie: prawy przycisk myszy lub Ctrl + przeciąganie. Przycisk ⛰ włącza/wyłącza 3D.',
+                searchPlaceholder: 'Szukaj miejscowości, regionu, kraju…',
+                searchButton: 'Szukaj (OpenStreetMap Nominatim)',
+                searchNoResults: 'Nic nie znaleziono',
+                searchFailed: 'Wyszukiwanie nie powiodło się, spróbuj ponownie',
+                searchCoordinates: 'Współrzędne',
+                languageToggleLabel: 'EN',
+                languageToggleTooltip: 'Switch to English'
+            }
+        };
+
+        // MapLibre's own control tooltips; keys missing here fall back to MapLibre's English defaults.
+        const MAPLIBRE_LOCALE_PL = {
+            'AttributionControl.ToggleAttribution': 'Pokaż/ukryj atrybucje',
+            'FullscreenControl.Enter': 'Pełny ekran',
+            'FullscreenControl.Exit': 'Zamknij pełny ekran',
+            'GeolocateControl.FindMyLocation': 'Pokaż moją lokalizację',
+            'GeolocateControl.LocationNotAvailable': 'Lokalizacja niedostępna',
+            'NavigationControl.ResetBearing': 'Ustaw północ u góry',
+            'NavigationControl.ZoomIn': 'Przybliż',
+            'NavigationControl.ZoomOut': 'Oddal',
+            'TerrainControl.Enable': 'Włącz teren 3D',
+            'TerrainControl.Disable': 'Wyłącz teren 3D',
+            'Popup.Close': 'Zamknij'
+        };
+
+        const LANGUAGES = ['en', 'pl'];
+
+        function detectBrowserLanguage() {
+            const preferred = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+            return preferred.toLowerCase().startsWith('pl') ? 'pl' : 'en';
+        }
+
+        // --- Layer catalogue ---
+
+        const OSM_ATTRIBUTION = '<a href="https://www.openstreetmap.org/copyright">&copy; OpenStreetMap Contributors</a>';
+        const ESRI_ATTRIBUTION = '&copy; Esri';
+
+        function rasterSource(tiles, maxzoom, attribution) {
+            return { type: 'raster', tiles, tileSize: 256, maxzoom, attribution };
+        }
+
+        function subdomainTiles(template) {
+            return ['a', 'b', 'c'].map((subdomain) => template.replace('{s}', subdomain));
+        }
+
+        // Exactly one base map is visible; 'none' leaves only the background colour.
+        const BASE_MAPS = [
+            {
+                id: 'osm',
+                icon: 'map',
+                source: rasterSource(['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], 19, OSM_ATTRIBUTION)
+            },
+            {
+                id: 'aerial',
+                icon: 'satellite_alt',
+                source: rasterSource(
+                    ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+                    19,
+                    'Imagery &copy; Esri, Maxar, Earthstar Geographics, GIS User Community'
+                )
+            },
+            {
+                id: 'opentopomap',
+                icon: 'terrain',
+                source: rasterSource(
+                    subdomainTiles('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'),
+                    17,
+                    OSM_ATTRIBUTION + ', SRTM | Style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
+                )
+            },
+            { id: 'none', icon: 'block', source: null }
+        ];
+        const BASE_MAP_IDS = BASE_MAPS.map((baseMap) => baseMap.id);
+
+        const RAIL_STYLES = ['standard', 'maxspeed', 'signals', 'electrification'];
+
+        function railTiles(railStyle) {
+            return subdomainTiles(`https://{s}.tiles.openrailwaymap.org/${railStyle}/{z}/{x}/{y}.png`);
+        }
+
+        // Transparent raster overlays, any number at once. Array order = drawing order;
+        // aboveContours puts text overlays over the contour lines so names stay readable.
+        const WAYMARKED_ATTRIBUTION = '<a href="https://waymarkedtrails.org">&copy; Waymarked Trails</a> (CC-BY-SA)';
+        const OVERLAYS = [
+            {
+                id: 'roads',
+                icon: 'add_road',
+                source: rasterSource(
+                    ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}'],
+                    19,
+                    ESRI_ATTRIBUTION
+                )
+            },
+            {
+                id: 'rail',
+                icon: 'train',
+                source: rasterSource(
+                    railTiles('standard'),
+                    19,
+                    '<a href="https://www.openrailwaymap.org/">OpenRailwayMap</a> (CC-BY-SA)'
+                )
+            },
+            {
+                id: 'hiking',
+                icon: 'hiking',
+                source: rasterSource(['https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png'], 18, WAYMARKED_ATTRIBUTION)
+            },
+            {
+                id: 'cycling',
+                icon: 'directions_bike',
+                source: rasterSource(['https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png'], 18, WAYMARKED_ATTRIBUTION)
+            },
+            {
+                id: 'mtb',
+                icon: 'pedal_bike',
+                source: rasterSource(['https://tile.waymarkedtrails.org/mtb/{z}/{x}/{y}.png'], 18, WAYMARKED_ATTRIBUTION)
+            },
+            {
+                id: 'ski',
+                icon: 'downhill_skiing',
+                source: rasterSource(
+                    ['https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png'],
+                    18,
+                    '<a href="https://www.opensnowmap.org">&copy; OpenSnowMap</a> (CC-BY-SA)'
+                )
+            },
+            {
+                id: 'seamarks',
+                icon: 'anchor',
+                source: rasterSource(
+                    ['https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png'],
+                    18,
+                    '<a href="https://www.openseamap.org">&copy; OpenSeaMap</a>'
+                )
+            },
+            {
+                id: 'labels',
+                icon: 'label',
+                aboveContours: true,
+                source: rasterSource(
+                    ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],
+                    19,
+                    ESRI_ATTRIBUTION
+                )
+            }
+        ];
+        const OVERLAY_IDS = OVERLAYS.map((overlay) => overlay.id);
+
+        const TERRAIN_LAYERS = [
+            { id: 'hillshade', icon: 'contrast' },
+            { id: 'contours', icon: 'line_curve' }
+        ];
+        const TERRAIN_LAYER_IDS = TERRAIN_LAYERS.map((terrainLayer) => terrainLayer.id);
 
         // --- Contour density ---
         // Intervals follow a 1-2-5 ladder; a contour step's major (labelled) line is two rungs up (1->5, 20->100).
@@ -165,72 +567,58 @@
             return zoomKey === undefined ? null : contourIntervalsForZoom(zoomKey, density);
         }
 
-        // Raster base map layers; every id here is both a source id and a layer id.
-        const BASE_MAP_SOURCES = {
-            osm: {
-                type: 'raster',
-                tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-                tileSize: 256,
-                maxzoom: 19,
-                attribution: OSM_ATTRIBUTION
-            },
-            aerial: {
-                type: 'raster',
-                tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-                tileSize: 256,
-                maxzoom: 19,
-                attribution: 'Zdjęcia: &copy; Esri, Maxar, Earthstar Geographics, GIS User Community'
-            },
-            opentopomap: {
-                type: 'raster',
-                tiles: [
-                    'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
-                    'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
-                    'https://c.tile.opentopomap.org/{z}/{x}/{y}.png'
-                ],
-                tileSize: 256,
-                maxzoom: 17,
-                attribution: OSM_ATTRIBUTION + ', SRTM | Styl: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
-            },
-            openrailwaymap: {
-                // Transparent overlay tiles: shown on top of the plain background colour.
-                type: 'raster',
-                tiles: [
-                    'https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
-                    'https://b.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
-                    'https://c.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'
-                ],
-                tileSize: 256,
-                maxzoom: 19,
-                attribution: OSM_ATTRIBUTION + ', Styl: <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a> (CC-BY-SA)'
+        // --- App state <-> URL hash (alongside MapLibre's own "map=" parameter) ---
+        // base=osm & overlays=rail,hiking & terrain=hillshade,contours & density=3 & rail=standard & lang=pl
+        // A missing list parameter means "default"; a present-but-empty one means "nothing selected".
+
+        function parseListParam(params, name, allowedIds, defaultIds) {
+            if (!params.has(name)) {
+                return new Set(defaultIds);
             }
-        };
+            return new Set(params.get(name).split(',').filter((id) => allowedIds.includes(id)));
+        }
 
-        // --- Layer state <-> URL hash (alongside MapLibre's own "map=" parameter) ---
-
-        function readLayerStateFromHash() {
+        function readAppStateFromHash() {
             const params = new URLSearchParams(window.location.hash.slice(1));
             const base = params.get('base');
-            const relief = params.get('relief');
             const density = Number(params.get('density'));
+            const railStyle = params.get('rail');
+            const lang = params.get('lang');
             return {
                 base: BASE_MAP_IDS.includes(base) ? base : 'osm',
-                relief: RELIEF_MODES.includes(relief) ? relief : 'both',
+                overlays: parseListParam(params, 'overlays', OVERLAY_IDS, []),
+                terrain: parseListParam(params, 'terrain', TERRAIN_LAYER_IDS, TERRAIN_LAYER_IDS),
                 density: Number.isInteger(density) && density >= CONTOUR_DENSITY_MIN && density <= CONTOUR_DENSITY_MAX
                     ? density
-                    : CONTOUR_DENSITY_DEFAULT
+                    : CONTOUR_DENSITY_DEFAULT,
+                railStyle: RAIL_STYLES.includes(railStyle) ? railStyle : 'standard',
+                // lang is written to the URL only after an explicit switch, so shared links follow the viewer's browser.
+                lang: LANGUAGES.includes(lang) ? lang : detectBrowserLanguage(),
+                langFromUrl: LANGUAGES.includes(lang)
             };
         }
 
-        function writeLayerStateToHash(layerState) {
+        function writeAppStateToHash() {
             const params = new URLSearchParams(window.location.hash.slice(1));
-            params.set('base', layerState.base);
-            params.set('relief', layerState.relief);
-            params.set('density', layerState.density);
-            // URLSearchParams encodes "/" in the map= value; MapLibre writes it unencoded, so keep that form.
-            const hash = '#' + params.toString().replace(/%2F/g, '/');
+            params.set('base', appState.base);
+            params.set('overlays', [...appState.overlays].join(','));
+            params.set('terrain', [...appState.terrain].join(','));
+            params.set('density', appState.density);
+            if (appState.overlays.has('rail')) {
+                params.set('rail', appState.railStyle);
+            } else {
+                params.delete('rail');
+            }
+            if (appState.langFromUrl) {
+                params.set('lang', appState.lang);
+            }
+            // URLSearchParams encodes "/" (MapLibre's map= value) and ","; keep both readable.
+            const hash = '#' + params.toString().replace(/%2F/g, '/').replace(/%2C/g, ',');
             window.history.replaceState(window.history.state, '', hash);
         }
+
+        const appState = readAppStateFromHash();
+        const t = TRANSLATIONS[appState.lang];
 
         // --- DEM sources: terrain and hillshade read Mapterhorn TileJSON; contours use maplibre-contour's DemSource ---
 
@@ -257,46 +645,67 @@
             });
         }
 
-        const layerState = readLayerStateFromHash();
+        // --- Style ---
 
-        const baseMapLayers = Object.keys(BASE_MAP_SOURCES).map((id) => ({
-            id,
-            type: 'raster',
-            source: id,
-            layout: { visibility: id === layerState.base ? 'visible' : 'none' }
-        }));
+        const baseMapLayerId = (id) => `base-${id}`;
+        const overlayLayerId = (id) => `overlay-${id}`;
 
-        const map = new maplibregl.Map({
-            container: 'map',
-            hash: 'map',
-            // Default view: Innsbruck, as in the Mapterhorn examples.
-            center: [11.392208, 47.276486],
-            zoom: 13,
-            pitch: 60,
-            bearing: 7.8,
-            maxPitch: 85,
-            style: {
+        function visibility(isVisible) {
+            return { visibility: isVisible ? 'visible' : 'none' };
+        }
+
+        function buildStyle() {
+            const sources = {
+                terrainSource: {
+                    type: 'raster-dem',
+                    url: 'https://tiles.mapterhorn.com/tilejson.json'
+                },
+                // Separate from terrainSource on purpose: MapLibre recommends not sharing one raster-dem source
+                // between terrain and hillshade.
+                hillshadeSource: {
+                    type: 'raster-dem',
+                    url: 'https://tiles.mapterhorn.com/tilejson.json'
+                },
+                contourSource: {
+                    type: 'vector',
+                    tiles: [contourTileUrlForDensity(appState.density)],
+                    minzoom: 10,
+                    maxzoom: CONTOUR_DEM_MAXZOOM + 2 // overzoom: 2
+                }
+            };
+
+            const baseMapLayers = [];
+            for (const baseMap of BASE_MAPS.filter((candidate) => candidate.source)) {
+                sources[baseMapLayerId(baseMap.id)] = baseMap.source;
+                baseMapLayers.push({
+                    id: baseMapLayerId(baseMap.id),
+                    type: 'raster',
+                    source: baseMapLayerId(baseMap.id),
+                    layout: visibility(baseMap.id === appState.base)
+                });
+            }
+
+            const overlayLayers = (aboveContours) => OVERLAYS
+                .filter((overlay) => Boolean(overlay.aboveContours) === aboveContours)
+                .map((overlay) => ({
+                    id: overlayLayerId(overlay.id),
+                    type: 'raster',
+                    source: overlayLayerId(overlay.id),
+                    layout: visibility(appState.overlays.has(overlay.id))
+                }));
+            for (const overlay of OVERLAYS) {
+                sources[overlayLayerId(overlay.id)] = overlay.id === 'rail'
+                    ? { ...overlay.source, tiles: railTiles(appState.railStyle) }
+                    : overlay.source;
+            }
+
+            const showHillshade = appState.terrain.has('hillshade');
+            const showContours = appState.terrain.has('contours');
+
+            return {
                 version: 8,
                 glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-                sources: {
-                    ...BASE_MAP_SOURCES,
-                    terrainSource: {
-                        type: 'raster-dem',
-                        url: 'https://tiles.mapterhorn.com/tilejson.json'
-                    },
-                    // Separate from terrainSource on purpose: MapLibre recommends not sharing one raster-dem source
-                    // between terrain and hillshade.
-                    hillshadeSource: {
-                        type: 'raster-dem',
-                        url: 'https://tiles.mapterhorn.com/tilejson.json'
-                    },
-                    contourSource: {
-                        type: 'vector',
-                        tiles: [contourTileUrlForDensity(layerState.density)],
-                        minzoom: 10,
-                        maxzoom: CONTOUR_DEM_MAXZOOM + 2 // overzoom: 2
-                    }
-                },
+                sources,
                 layers: [
                     {
                         id: 'background',
@@ -308,13 +717,16 @@
                         id: 'hillshade',
                         type: 'hillshade',
                         source: 'hillshadeSource',
+                        layout: visibility(showHillshade),
                         paint: { 'hillshade-shadow-color': '#473B24' }
                     },
+                    ...overlayLayers(false),
                     {
                         id: 'contour-lines',
                         type: 'line',
                         source: 'contourSource',
                         'source-layer': 'contours',
+                        layout: visibility(showContours),
                         paint: {
                             'line-color': 'rgb(215, 151, 60)',
                             'line-width': ['match', ['get', 'level'], 1, 1.2, 0.6]
@@ -327,6 +739,7 @@
                         'source-layer': 'contours',
                         filter: ['>', ['get', 'level'], 0],
                         layout: {
+                            ...visibility(showContours),
                             'symbol-placement': 'line',
                             'text-size': 13,
                             'text-field': ['concat', ['number-format', ['get', 'ele'], {}], ' m'],
@@ -337,14 +750,28 @@
                             'text-halo-color': 'white',
                             'text-halo-width': 1.5
                         }
-                    }
+                    },
+                    ...overlayLayers(true)
                 ],
                 terrain: {
                     source: 'terrainSource',
                     exaggeration: 1
                 },
                 sky: {}
-            }
+            };
+        }
+
+        const map = new maplibregl.Map({
+            container: 'map',
+            hash: 'map',
+            // Default view: Innsbruck, as in the Mapterhorn examples.
+            center: [11.392208, 47.276486],
+            zoom: 13,
+            pitch: 60,
+            bearing: 7.8,
+            maxPitch: 85,
+            locale: appState.lang === 'pl' ? MAPLIBRE_LOCALE_PL : undefined,
+            style: buildStyle()
         });
 
         map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -353,78 +780,291 @@
         map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right');
         map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
-        // --- Layer switching ---
+        // --- Panel ---
 
-        function applyBaseMap(baseMapId) {
-            for (const id of Object.keys(BASE_MAP_SOURCES)) {
-                map.setLayoutProperty(id, 'visibility', id === baseMapId ? 'visible' : 'none');
+        // Layer buttons exist before the style finishes loading; clicks made that early are queued until it does.
+        function whenStyleReady(callback) {
+            if (map.isStyleLoaded()) {
+                callback();
+            } else {
+                map.once('style.load', callback);
             }
         }
 
-        function applyRelief(reliefMode) {
-            const showHillshade = reliefMode === 'hillshade' || reliefMode === 'both';
-            const showContours = reliefMode === 'contours' || reliefMode === 'both';
-            map.setLayoutProperty('hillshade', 'visibility', showHillshade ? 'visible' : 'none');
-            map.setLayoutProperty('contour-lines', 'visibility', showContours ? 'visible' : 'none');
-            map.setLayoutProperty('contour-labels', 'visibility', showContours ? 'visible' : 'none');
-            document.getElementById('contour-density-fieldset').disabled = !showContours;
+        function createIconButton(icon, label, onClick) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'icon-button';
+            button.setAttribute('aria-label', label);
+            button.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true">${icon}</span>`;
+            button.addEventListener('click', () => whenStyleReady(onClick));
+            return button;
         }
 
-        function applyContourDensity(density) {
-            map.getSource('contourSource').setTiles([contourTileUrlForDensity(density)]);
+        function setPressed(button, isPressed) {
+            button.setAttribute('aria-pressed', String(isPressed));
+        }
+
+        const baseMapButtons = new Map();
+        const overlayButtons = new Map();
+        const terrainButtons = new Map();
+
+        function renderPanel() {
+            document.documentElement.lang = appState.lang;
+            document.querySelectorAll('[data-i18n]').forEach((element) => {
+                element.textContent = t[element.dataset.i18n];
+            });
+
+            for (const baseMap of BASE_MAPS) {
+                const button = createIconButton(baseMap.icon, t[`base.${baseMap.id}`], () => selectBaseMap(baseMap.id));
+                baseMapButtons.set(baseMap.id, button);
+                document.getElementById('base-buttons').append(button);
+            }
+            for (const overlay of OVERLAYS) {
+                const button = createIconButton(overlay.icon, t[`overlay.${overlay.id}`], () => toggleOverlay(overlay.id));
+                overlayButtons.set(overlay.id, button);
+                document.getElementById('overlay-buttons').append(button);
+            }
+            for (const terrainLayer of TERRAIN_LAYERS) {
+                const button = createIconButton(terrainLayer.icon, t[`terrain.${terrainLayer.id}`], () => toggleTerrainLayer(terrainLayer.id));
+                terrainButtons.set(terrainLayer.id, button);
+                document.getElementById('terrain-buttons').append(button);
+            }
+
+            const railStyleSelect = document.getElementById('rail-style');
+            railStyleSelect.setAttribute('aria-label', t.railStyleLabel);
+            for (const railStyle of RAIL_STYLES) {
+                railStyleSelect.append(new Option(t[`railStyle.${railStyle}`], railStyle));
+            }
+
+            const searchInput = document.getElementById('search-input');
+            searchInput.placeholder = t.searchPlaceholder;
+            searchInput.setAttribute('aria-label', t.searchPlaceholder);
+            document.getElementById('search-button').setAttribute('aria-label', t.searchButton);
+
+            const languageToggle = document.getElementById('language-toggle');
+            languageToggle.setAttribute('aria-label', t.languageToggleTooltip);
+            document.getElementById('language-toggle-label').textContent = t.languageToggleLabel;
+
+            // Collapse the layer panel by default on narrow screens so the map stays usable.
+            if (window.matchMedia('(max-width: 600px)').matches) {
+                document.getElementById('layer-panel').open = false;
+            }
+        }
+
+        function syncPanelToState() {
+            for (const [id, button] of baseMapButtons) setPressed(button, id === appState.base);
+            for (const [id, button] of overlayButtons) setPressed(button, appState.overlays.has(id));
+            for (const [id, button] of terrainButtons) setPressed(button, appState.terrain.has(id));
+
+            const railStyleSelect = document.getElementById('rail-style');
+            railStyleSelect.hidden = !appState.overlays.has('rail');
+            railStyleSelect.value = appState.railStyle;
+
+            document.getElementById('contour-density').value = appState.density;
+            document.getElementById('contour-density-fieldset').disabled = !appState.terrain.has('contours');
             updateContourIntervalInfo();
         }
 
         function updateContourIntervalInfo() {
-            const intervals = contourIntervalsAtMapZoom(map.getZoom(), layerState.density);
+            const intervals = contourIntervalsAtMapZoom(map.getZoom(), appState.density);
             document.getElementById('contour-interval-info').textContent = intervals
-                ? `W środku widoku: co ${intervals[0]} m, pogrubione co ${intervals[1]} m`
-                : 'Poziomice widoczne od zoomu 10';
+                ? t.contourInterval(intervals[0], intervals[1])
+                : t.contourBelowMinZoom;
         }
 
-        function syncPanelToState() {
-            document.querySelector(`input[name="base"][value="${layerState.base}"]`).checked = true;
-            document.querySelector(`input[name="relief"][value="${layerState.relief}"]`).checked = true;
-            document.getElementById('contour-density').value = layerState.density;
+        // --- Layer switching ---
+
+        function selectBaseMap(baseMapId) {
+            appState.base = baseMapId;
+            for (const baseMap of BASE_MAPS.filter((candidate) => candidate.source)) {
+                map.setLayoutProperty(baseMapLayerId(baseMap.id), 'visibility', visibility(baseMap.id === baseMapId).visibility);
+            }
+            afterStateChange();
         }
 
+        function toggleOverlay(overlayId) {
+            if (appState.overlays.has(overlayId)) {
+                appState.overlays.delete(overlayId);
+            } else {
+                appState.overlays.add(overlayId);
+            }
+            map.setLayoutProperty(overlayLayerId(overlayId), 'visibility', visibility(appState.overlays.has(overlayId)).visibility);
+            afterStateChange();
+        }
+
+        function selectRailStyle(railStyle) {
+            appState.railStyle = railStyle;
+            map.getSource(overlayLayerId('rail')).setTiles(railTiles(railStyle));
+            afterStateChange();
+        }
+
+        function toggleTerrainLayer(terrainLayerId) {
+            if (appState.terrain.has(terrainLayerId)) {
+                appState.terrain.delete(terrainLayerId);
+            } else {
+                appState.terrain.add(terrainLayerId);
+            }
+            const layerIds = terrainLayerId === 'hillshade' ? ['hillshade'] : ['contour-lines', 'contour-labels'];
+            for (const layerId of layerIds) {
+                map.setLayoutProperty(layerId, 'visibility', visibility(appState.terrain.has(terrainLayerId)).visibility);
+            }
+            afterStateChange();
+        }
+
+        function selectContourDensity(density) {
+            appState.density = density;
+            map.getSource('contourSource').setTiles([contourTileUrlForDensity(density)]);
+            afterStateChange();
+        }
+
+        function afterStateChange() {
+            syncPanelToState();
+            writeAppStateToHash();
+        }
+
+        function switchLanguage() {
+            appState.lang = appState.lang === 'en' ? 'pl' : 'en';
+            appState.langFromUrl = true;
+            writeAppStateToHash();
+            // MapLibre reads its locale only at construction; the hash keeps view and layers across the reload.
+            window.location.reload();
+        }
+
+        // --- Search (OpenStreetMap Nominatim) ---
+        // Nominatim usage policy: max 1 request/s and no search-as-you-type, so search runs on submit only.
+
+        const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
+        const NOMINATIM_MIN_REQUEST_INTERVAL_MS = 1000;
+        const COORDINATES_PATTERN = /^\s*(-?\d{1,2}(?:\.\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/;
+
+        let lastSearchRequestAt = 0;
+        let searchResultMarker = null;
+
+        function showSearchMarker(lngLat) {
+            if (!searchResultMarker) {
+                searchResultMarker = new maplibregl.Marker({ color: '#1a73e8' });
+            }
+            searchResultMarker.setLngLat(lngLat).addTo(map);
+        }
+
+        function clearSearch() {
+            document.getElementById('search-results').replaceChildren();
+            if (searchResultMarker) searchResultMarker.remove();
+        }
+
+        function showSearchMessage(message) {
+            const item = document.createElement('li');
+            item.className = 'search-message';
+            item.textContent = message;
+            document.getElementById('search-results').replaceChildren(item);
+        }
+
+        function goToSearchResult(result) {
+            const [south, north, west, east] = result.boundingbox.map(Number);
+            map.fitBounds([[west, south], [east, north]], { padding: 60, maxZoom: 15, duration: 2000 });
+            showSearchMarker([Number(result.lon), Number(result.lat)]);
+        }
+
+        function renderSearchResults(results) {
+            const items = results.map((result, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.setAttribute('aria-current', String(index === 0));
+                button.textContent = result.display_name;
+                const type = document.createElement('span');
+                type.className = 'result-type';
+                type.textContent = (result.addresstype || result.type || '').replace(/_/g, ' ');
+                button.append(type);
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('#search-results button').forEach((other) => other.setAttribute('aria-current', 'false'));
+                    button.setAttribute('aria-current', 'true');
+                    goToSearchResult(result);
+                });
+                const item = document.createElement('li');
+                item.append(button);
+                return item;
+            });
+            document.getElementById('search-results').replaceChildren(...items);
+        }
+
+        async function runSearch(query) {
+            const coordinates = query.match(COORDINATES_PATTERN);
+            if (coordinates) {
+                const lngLat = [Number(coordinates[2]), Number(coordinates[1])];
+                showSearchMessage(`${t.searchCoordinates}: ${coordinates[1]}, ${coordinates[2]}`);
+                map.flyTo({ center: lngLat, zoom: Math.max(map.getZoom(), 14), duration: 2000 });
+                showSearchMarker(lngLat);
+                return;
+            }
+
+            const waitMs = lastSearchRequestAt + NOMINATIM_MIN_REQUEST_INTERVAL_MS - Date.now();
+            if (waitMs > 0) {
+                await new Promise((resolve) => setTimeout(resolve, waitMs));
+            }
+            lastSearchRequestAt = Date.now();
+
+            const params = new URLSearchParams({
+                q: query,
+                format: 'jsonv2',
+                limit: '5',
+                'accept-language': appState.lang
+            });
+            const searchButton = document.getElementById('search-button');
+            searchButton.disabled = true;
+            try {
+                const response = await fetch(`${NOMINATIM_SEARCH_URL}?${params}`);
+                if (!response.ok) throw new Error(`Nominatim HTTP ${response.status}`);
+                const results = await response.json();
+                if (results.length === 0) {
+                    showSearchMessage(t.searchNoResults);
+                    return;
+                }
+                renderSearchResults(results);
+                goToSearchResult(results[0]);
+            } catch (error) {
+                console.error(error);
+                showSearchMessage(t.searchFailed);
+            } finally {
+                searchButton.disabled = false;
+            }
+        }
+
+        // --- Wiring ---
+
+        renderPanel();
         syncPanelToState();
 
         // 'style.load' fires once layers exist; 'load' would wait for the first full set of tiles.
         map.once('style.load', () => {
-            applyRelief(layerState.relief);
-            updateContourIntervalInfo();
-            writeLayerStateToHash(layerState);
+            syncPanelToState();
+            writeAppStateToHash();
 
             map.on('zoomend', updateContourIntervalInfo);
-
             document.getElementById('contour-density').addEventListener('input', (event) => {
-                layerState.density = Number(event.target.value);
-                applyContourDensity(layerState.density);
-                writeLayerStateToHash(layerState);
+                selectContourDensity(Number(event.target.value));
             });
-
-            document.querySelectorAll('input[name="base"]').forEach((input) => {
-                input.addEventListener('change', () => {
-                    layerState.base = input.value;
-                    applyBaseMap(layerState.base);
-                    writeLayerStateToHash(layerState);
-                });
-            });
-
-            document.querySelectorAll('input[name="relief"]').forEach((input) => {
-                input.addEventListener('change', () => {
-                    layerState.relief = input.value;
-                    applyRelief(layerState.relief);
-                    writeLayerStateToHash(layerState);
-                });
+            document.getElementById('rail-style').addEventListener('change', (event) => {
+                selectRailStyle(event.target.value);
             });
         });
 
-        // Collapse the panel by default on narrow screens so the map stays usable.
-        if (window.matchMedia('(max-width: 600px)').matches) {
-            document.getElementById('layer-panel').open = false;
-        }
+        document.getElementById('language-toggle').addEventListener('click', switchLanguage);
+
+        document.getElementById('search-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const query = document.getElementById('search-input').value.trim();
+            if (query) runSearch(query);
+        });
+        document.getElementById('search-input').addEventListener('input', (event) => {
+            if (!event.target.value) clearSearch();
+        });
+        document.getElementById('search-input').addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                event.target.value = '';
+                clearSearch();
+            }
+        });
     </script>
 </body>
 
