@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/maplibre-contour@0.0.5/dist/index.min.js"></script>
     <!-- Icon subset: icon_names must stay alphabetically sorted or Google Fonts rejects the request. -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=add_road,anchor,block,close,contrast,directions_bike,domain,downhill_skiing,hiking,label,landscape,line_curve,map,satellite_alt,search,signpost,terrain,train,translate&display=block" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=add_road,anchor,block,close,contrast,directions_bike,domain,downhill_skiing,hiking,info,label,landscape,line_curve,map,satellite_alt,search,signpost,terrain,train,translate&display=block" />
     <style>
         html,
         body {
@@ -279,8 +279,15 @@
             font-weight: 600;
         }
 
-        #language-toggle::after {
-            left: auto;
+        .footer-buttons {
+            display: flex;
+            gap: 4px;
+            flex: none;
+        }
+
+        /* Footer buttons sit at the panel's right edge: anchor their tooltips to the right. */
+        .footer-buttons .icon-button::after {
+            left: auto !important;
             right: 0;
         }
     </style>
@@ -325,10 +332,15 @@
                 </fieldset>
                 <div class="panel-footer">
                     <p class="hint" data-i18n="navigationHint"></p>
-                    <button type="button" class="icon-button" id="language-toggle">
-                        <span class="material-symbols-outlined" aria-hidden="true">translate</span>
-                        <span id="language-toggle-label"></span>
-                    </button>
+                    <div class="footer-buttons">
+                        <a class="icon-button" id="about-link" target="_blank" rel="noopener">
+                            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                        </a>
+                        <button type="button" class="icon-button" id="language-toggle">
+                            <span class="material-symbols-outlined" aria-hidden="true">translate</span>
+                            <span id="language-toggle-label"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </details>
@@ -377,7 +389,9 @@
                 searchFailed: 'Search failed, please try again',
                 searchCoordinates: 'Coordinates',
                 languageToggleLabel: 'PL',
-                languageToggleTooltip: 'Przełącz na polski'
+                languageToggleTooltip: 'Przełącz na polski',
+                aboutTooltip: 'About, licences and terms of use',
+                attributionTermsLink: 'Licences & terms'
             },
             pl: {
                 panelTitle: 'Warstwy',
@@ -418,7 +432,9 @@
                 searchFailed: 'Wyszukiwanie nie powiodło się, spróbuj ponownie',
                 searchCoordinates: 'Współrzędne',
                 languageToggleLabel: 'EN',
-                languageToggleTooltip: 'Switch to English'
+                languageToggleTooltip: 'Switch to English',
+                aboutTooltip: 'O mapie, licencje i warunki użycia',
+                attributionTermsLink: 'Licencje i warunki'
             }
         };
 
@@ -445,7 +461,7 @@
         // --- Layer catalogue ---
 
         const OSM_ATTRIBUTION = '<a href="https://www.openstreetmap.org/copyright">&copy; OpenStreetMap Contributors</a>';
-        const ESRI_ATTRIBUTION = '&copy; Esri';
+        const OSM_CONTRIBUTORS = '&copy; OpenStreetMap contributors';
 
         function rasterSource(tiles, maxzoom, attribution) {
             return { type: 'raster', tiles, tileSize: 256, maxzoom, attribution };
@@ -468,7 +484,7 @@
                 source: rasterSource(
                     ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
                     19,
-                    'Imagery &copy; Esri, Maxar, Earthstar Geographics, GIS User Community'
+                    'Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community'
                 )
             },
             {
@@ -492,7 +508,7 @@
 
         // Transparent raster overlays, any number at once. Array order = drawing order;
         // aboveContours puts text overlays over the contour lines so names stay readable.
-        const WAYMARKED_ATTRIBUTION = '<a href="https://waymarkedtrails.org">&copy; Waymarked Trails</a> (CC-BY-SA)';
+        const WAYMARKED_ATTRIBUTION = '<a href="https://waymarkedtrails.org">&copy; Waymarked Trails</a>, ' + OSM_ATTRIBUTION;
         const OVERLAYS = [
             {
                 id: 'roads',
@@ -500,7 +516,7 @@
                 source: rasterSource(
                     ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}'],
                     19,
-                    ESRI_ATTRIBUTION
+                    'Esri, HERE, Garmin, ' + OSM_CONTRIBUTORS
                 )
             },
             {
@@ -511,7 +527,7 @@
                 source: rasterSource(
                     subdomainTiles('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm-lite/{z}/{x}/{y}.png'),
                     19,
-                    '<a href="https://www.cyclosm.org">CyclOSM</a> (CC-BY-SA)'
+                    '<a href="https://www.cyclosm.org">CyclOSM</a> (CC-BY-SA 2.0), ' + OSM_ATTRIBUTION
                 )
             },
             {
@@ -520,7 +536,7 @@
                 source: rasterSource(
                     railTiles('standard'),
                     19,
-                    '<a href="https://www.openrailwaymap.org/">OpenRailwayMap</a> (CC-BY-SA)'
+                    'Data ' + OSM_ATTRIBUTION + ', Style: CC-BY-SA 2.0 <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>'
                 )
             },
             {
@@ -546,7 +562,7 @@
                 source: rasterSource(
                     ['https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png'],
                     18,
-                    '<a href="https://www.opensnowmap.org">&copy; OpenSnowMap</a> (CC-BY-SA)'
+                    '<a href="https://www.opensnowmap.org">&copy; OpenSnowMap</a>, ' + OSM_ATTRIBUTION
                 )
             },
             {
@@ -555,7 +571,7 @@
                 source: rasterSource(
                     ['https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png'],
                     18,
-                    '<a href="https://www.openseamap.org">&copy; OpenSeaMap</a>'
+                    '<a href="https://www.openseamap.org">&copy; OpenSeaMap contributors</a> (CC-BY-SA 2.0)'
                 )
             },
             {
@@ -565,7 +581,7 @@
                 source: rasterSource(
                     ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],
                     19,
-                    ESRI_ATTRIBUTION
+                    'Esri, HERE, Garmin, ' + OSM_CONTRIBUTORS + ', and the GIS user community'
                 )
             }
         ];
@@ -669,6 +685,10 @@
         }
 
         const appState = readAppStateFromHash();
+
+        function aboutPageUrl() {
+            return `about.html#lang=${appState.lang}`;
+        }
         const t = TRANSLATIONS[appState.lang];
 
         // --- DEM sources: terrain and hillshade read Mapterhorn TileJSON; contours use maplibre-contour's DemSource ---
@@ -849,6 +869,10 @@
             bearing: 7.8,
             maxPitch: 85,
             locale: appState.lang === 'pl' ? MAPLIBRE_LOCALE_PL : undefined,
+            // Permanent link to licences and terms next to the providers' attributions.
+            attributionControl: {
+                customAttribution: `<a href="${aboutPageUrl()}" target="_blank" rel="noopener">${t.attributionTermsLink}</a>`
+            },
             style: buildStyle()
         });
 
@@ -922,6 +946,10 @@
 
             const languageToggle = document.getElementById('language-toggle');
             languageToggle.setAttribute('aria-label', t.languageToggleTooltip);
+
+            const aboutLink = document.getElementById('about-link');
+            aboutLink.href = aboutPageUrl();
+            aboutLink.setAttribute('aria-label', t.aboutTooltip);
             document.getElementById('language-toggle-label').textContent = t.languageToggleLabel;
 
             // Collapse the layer panel by default on narrow screens so the map stays usable.

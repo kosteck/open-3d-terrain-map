@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About, licences and terms – Open 3D Terrain Map</title>
+    <style>
+        :root {
+            --text: #222;
+            --muted: #5f6368;
+            --accent: #1a73e8;
+            --border: #dadce0;
+            --surface: #fff;
+            --background: #f6f7f9;
+            --warning-background: #fff8e1;
+            --warning-border: #f2c94c;
+        }
+
+        html {
+            background: var(--background);
+        }
+
+        body {
+            margin: 0;
+            padding: 24px 16px 48px;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            font-size: 15px;
+            line-height: 1.55;
+            color: var(--text);
+        }
+
+        main {
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        header.page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 26px;
+            line-height: 1.25;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin: 32px 0 10px;
+        }
+
+        a {
+            color: var(--accent);
+        }
+
+        .updated {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 0 0 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        #language-switch {
+            flex: none;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            cursor: pointer;
+        }
+
+        .notice {
+            background: var(--warning-background);
+            border: 1px solid var(--warning-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+
+        .notice ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .notice li+li {
+            margin-top: 6px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 720px;
+            font-size: 13.5px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        th {
+            background: #f1f3f4;
+            font-weight: 600;
+        }
+
+        td code {
+            font-size: 12.5px;
+            word-break: break-word;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        article[hidden] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <!-- ===================== ENGLISH ===================== -->
+        <article lang="en" data-language="en">
+            <a class="back-link" href="./">← Back to the map</a>
+            <header class="page-header">
+                <h1>About, licences and terms of use</h1>
+                <button type="button" id="language-switch-en" class="language-switch" data-target="pl">Polski</button>
+            </header>
+            <p class="updated">Last updated: 18 October 2026</p>
+
+            <h2>About this project</h2>
+            <p>Open 3D Terrain Map is a hobby, non-commercial visualisation of open map and elevation data.
+                The source code is available on <a href="https://github.com/kosteck/open-3d-terrain-map">GitHub</a>
+                under the <a href="https://github.com/kosteck/open-3d-terrain-map/blob/main/LICENSE">MIT licence</a>. The
+                map data and map tiles are <strong>not</strong> covered by the MIT licence; they belong to the providers
+                listed below and are subject to their licences and terms.</p>
+            <p>The application is provided “as is”, without any warranty.</p>
+
+            <h2>Disclaimer and permitted use</h2>
+            <div class="notice">
+                <ul>
+                    <li><strong>Personal, non-commercial use only, with low traffic.</strong> Several providers (Esri,
+                        OpenStreetMap, OpenRailwayMap and other volunteer-run servers) allow free use only on these
+                        conditions.</li>
+                    <li><strong>Not for navigation or safety-critical decisions.</strong> Trails, ski pistes, sea marks,
+                        elevation, contour lines and buildings may be outdated, incomplete or inaccurate. Do not rely on
+                        this map in the mountains, at sea or anywhere your safety depends on it.</li>
+                    <li><strong>No bulk downloading, scraping or automated access</strong> to the map tiles or the search
+                        through this application. These are the providers’ rules.</li>
+                    <li><strong>No guaranteed availability.</strong> The application depends on free third-party services
+                        that may change, limit or stop at any time.</li>
+                    <li>The status of Esri layers (aerial imagery, roads, names and borders) used without an ArcGIS account
+                        is not explicitly defined in Esri’s published terms; they are shown here for personal,
+                        non-commercial preview only and may be removed at Esri’s request.</li>
+                </ul>
+            </div>
+
+            <h2>Privacy</h2>
+            <p>The application itself sets no cookies, uses no analytics and has no server of its own. However, to show
+                the map your browser connects directly to the services listed below; each of them receives your IP
+                address and learns which map area you are viewing. Search queries are sent to
+                OpenStreetMap Nominatim. The location from the “find my location” button is used only in your browser to
+                centre the map and is not sent anywhere by the application.</p>
+            <p class="muted">Contacted hosts: kosteck.github.io (GitHub Pages hosting), unpkg.com, fonts.googleapis.com,
+                fonts.gstatic.com, demotiles.maplibre.org, tiles.mapterhorn.com, tiles.openfreemap.org,
+                tile.openstreetmap.org, nominatim.openstreetmap.org, server.arcgisonline.com, tile.opentopomap.org,
+                tiles.openrailwaymap.org, tile.waymarkedtrails.org, tile-cyclosm.openstreetmap.fr, tiles.opensnowmap.org,
+                tiles.openseamap.org.</p>
+
+            <h2>Map data and services</h2>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Used for</th>
+                            <th>Licence / terms</th>
+                            <th>Attribution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></td>
+                            <td>Base map “OpenStreetMap”</td>
+                            <td>Data: ODbL 1.0; tiles: CC BY-SA 2.0. <a
+                                    href="https://operations.osmfoundation.org/policies/tiles/">Tile usage policy</a></td>
+                            <td>© OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://nominatim.org">Nominatim</a> (OpenStreetMap)</td>
+                            <td>Search</td>
+                            <td>Results: ODbL 1.0. <a href="https://operations.osmfoundation.org/policies/nominatim/">Usage
+                                    policy</a> (max 1 request/s, no autocomplete)</td>
+                            <td>© OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://mapterhorn.com">Mapterhorn</a></td>
+                            <td>3D terrain, hillshade, contour lines</td>
+                            <td>Built from 151 open elevation datasets, mostly CC BY 4.0, open government licences and public
+                                domain (in Poland: GUGiK, open government data). <a
+                                    href="https://download.mapterhorn.com/attribution.json">Full list of sources and
+                                    licences</a></td>
+                            <td>© Mapterhorn and its <a href="https://mapterhorn.com/attribution/">data sources</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://openfreemap.org">OpenFreeMap</a></td>
+                            <td>3D buildings</td>
+                            <td>OpenMapTiles schema, OpenStreetMap data (ODbL 1.0). Free, commercial use allowed.</td>
+                            <td>OpenFreeMap © OpenMapTiles Data from OpenStreetMap</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9">Esri
+                                    World Imagery</a></td>
+                            <td>Base map “Aerial imagery”</td>
+                            <td><a href="https://www.esri.com/en-us/legal/terms/full-master-agreement">Esri Master License
+                                    Agreement</a>; see the disclaimer above</td>
+                            <td>Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community</td>
+                        </tr>
+                        <tr>
+                            <td>Esri World Transportation, World Boundaries and Places</td>
+                            <td>Overlays “Roads”, “Place names and borders”</td>
+                            <td><a href="https://www.esri.com/en-us/legal/terms/full-master-agreement">Esri Master License
+                                    Agreement</a>; see the disclaimer above</td>
+                            <td>Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://opentopomap.org/about">OpenTopoMap</a></td>
+                            <td>Base map “OpenTopoMap”</td>
+                            <td>CC BY-SA</td>
+                            <td>Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.openrailwaymap.org">OpenRailwayMap</a></td>
+                            <td>Overlay “Railways” (4 styles)</td>
+                            <td>Tiles: CC BY-SA 2.0; data: ODbL 1.0. Free only for small, public, non-commercial apps. <a
+                                    href="https://wiki.openstreetmap.org/wiki/OpenRailwayMap/API">Terms</a></td>
+                            <td>Data © OpenStreetMap contributors, Style: CC-BY-SA 2.0 OpenRailwayMap</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.cyclosm.org">CyclOSM</a> (tiles hosted by OpenStreetMap France)</td>
+                            <td>Overlay “Cycle lanes and paths”</td>
+                            <td>Tiles: CC BY-SA 2.0; data: ODbL 1.0</td>
+                            <td>CyclOSM, © OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://waymarkedtrails.org">Waymarked Trails</a></td>
+                            <td>Overlays “Hiking trails”, “Signposted cycling routes”, “Mountain bike trails”</td>
+                            <td>Data: ODbL 1.0 (OpenStreetMap); tile licence not stated publicly</td>
+                            <td>© Waymarked Trails, © OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.opensnowmap.org">OpenSnowMap</a></td>
+                            <td>Overlay “Ski pistes”</td>
+                            <td>Data: ODbL 1.0 (OpenStreetMap); tile licence not stated publicly</td>
+                            <td>© OpenSnowMap, © OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.openseamap.org">OpenSeaMap</a></td>
+                            <td>Overlay “Sea marks”</td>
+                            <td>CC BY-SA 2.0</td>
+                            <td>© OpenSeaMap contributors</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Software</h2>
+            <ul>
+                <li><a href="https://maplibre.org">MapLibre GL JS</a> 5.6.0 – BSD 3-Clause (loaded from unpkg.com)</li>
+                <li><a href="https://github.com/onthegomap/maplibre-contour">maplibre-contour</a> 0.0.5 – BSD 3-Clause
+                    (loaded from unpkg.com)</li>
+                <li><a href="https://fonts.google.com/icons">Material Symbols</a> icons – Apache 2.0 (loaded from Google
+                    Fonts)</li>
+                <li>Noto Sans glyphs for contour labels – SIL Open Font License 1.1 (from demotiles.maplibre.org)</li>
+            </ul>
+
+            <h2>Contact and corrections</h2>
+            <ul>
+                <li>Problems with this application: <a
+                        href="https://github.com/kosteck/open-3d-terrain-map/issues">GitHub Issues</a></li>
+                <li>Errors in the map data (roads, trails, names, buildings): <a
+                        href="https://www.openstreetmap.org/fixthemap">report or fix them in OpenStreetMap</a></li>
+            </ul>
+        </article>
+
+        <!-- ===================== POLSKI ===================== -->
+        <article lang="pl" data-language="pl" hidden>
+            <a class="back-link" href="./">← Powrót do mapy</a>
+            <header class="page-header">
+                <h1>O mapie, licencje i warunki użycia</h1>
+                <button type="button" id="language-switch-pl" class="language-switch" data-target="en">English</button>
+            </header>
+            <p class="updated">Ostatnia aktualizacja: 18 października 2026</p>
+
+            <h2>O projekcie</h2>
+            <p>Open 3D Terrain Map to hobbystyczna, niekomercyjna wizualizacja otwartych danych mapowych i wysokościowych.
+                Kod źródłowy jest dostępny na <a
+                    href="https://github.com/kosteck/open-3d-terrain-map">GitHubie</a> na <a
+                    href="https://github.com/kosteck/open-3d-terrain-map/blob/main/LICENSE">licencji MIT</a>. Licencja MIT
+                <strong>nie</strong> obejmuje danych ani kafelków map – należą one do dostawców wymienionych poniżej i
+                podlegają ich licencjom oraz warunkom.</p>
+            <p>Aplikacja jest udostępniana „tak jak jest”, bez żadnych gwarancji.</p>
+
+            <h2>Zastrzeżenia i dozwolone użycie</h2>
+            <div class="notice">
+                <ul>
+                    <li><strong>Wyłącznie do osobistego, niekomercyjnego użytku, przy małym ruchu.</strong> Część dostawców
+                        (Esri, OpenStreetMap, OpenRailwayMap i inne serwery utrzymywane przez wolontariuszy) pozwala na
+                        bezpłatne użycie tylko na tych warunkach.</li>
+                    <li><strong>Nie do nawigacji ani decyzji związanych z bezpieczeństwem.</strong> Szlaki, trasy
+                        narciarskie, znaki nawigacyjne, wysokości, poziomice i budynki mogą być nieaktualne, niepełne lub
+                        niedokładne. Nie polegaj na tej mapie w górach, na morzu ani tam, gdzie zależy od tego twoje
+                        bezpieczeństwo.</li>
+                    <li><strong>Zakaz masowego pobierania, scrapowania i automatycznego odpytywania</strong> kafelków i
+                        wyszukiwarki przez tę aplikację. To zasady dostawców.</li>
+                    <li><strong>Brak gwarancji dostępności.</strong> Aplikacja korzysta z darmowych usług zewnętrznych,
+                        które mogą się zmienić, zostać ograniczone lub wyłączone w każdej chwili.</li>
+                    <li>Status warstw Esri (zdjęcia lotnicze, drogi, nazwy i granice) używanych bez konta ArcGIS nie jest
+                        jednoznacznie określony w opublikowanych warunkach Esri; pokazujemy je wyłącznie do osobistego,
+                        niekomercyjnego podglądu i możemy je usunąć na żądanie Esri.</li>
+                </ul>
+            </div>
+
+            <h2>Prywatność</h2>
+            <p>Sama aplikacja nie używa cookies ani analityki i nie ma własnego serwera. Żeby jednak pokazać mapę, twoja
+                przeglądarka łączy się bezpośrednio z usługami wymienionymi poniżej; każda z nich otrzymuje twój adres IP i
+                wie, jaki obszar mapy oglądasz. Treść wyszukiwania trafia do OpenStreetMap Nominatim. Lokalizacja z
+                przycisku „pokaż moją lokalizację” jest używana tylko w twojej przeglądarce do wycentrowania mapy i nie
+                jest nigdzie wysyłana przez aplikację.</p>
+            <p class="muted">Odpytywane serwery: kosteck.github.io (hosting GitHub Pages), unpkg.com, fonts.googleapis.com,
+                fonts.gstatic.com, demotiles.maplibre.org, tiles.mapterhorn.com, tiles.openfreemap.org,
+                tile.openstreetmap.org, nominatim.openstreetmap.org, server.arcgisonline.com, tile.opentopomap.org,
+                tiles.openrailwaymap.org, tile.waymarkedtrails.org, tile-cyclosm.openstreetmap.fr, tiles.opensnowmap.org,
+                tiles.openseamap.org.</p>
+
+            <h2>Dane i usługi map</h2>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dostawca</th>
+                            <th>Do czego</th>
+                            <th>Licencja / warunki</th>
+                            <th>Atrybucja</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></td>
+                            <td>Mapa bazowa „OpenStreetMap”</td>
+                            <td>Dane: ODbL 1.0; kafelki: CC BY-SA 2.0. <a
+                                    href="https://operations.osmfoundation.org/policies/tiles/">Zasady korzystania z
+                                    kafelków</a></td>
+                            <td>© OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://nominatim.org">Nominatim</a> (OpenStreetMap)</td>
+                            <td>Wyszukiwarka</td>
+                            <td>Wyniki: ODbL 1.0. <a href="https://operations.osmfoundation.org/policies/nominatim/">Zasady
+                                    korzystania</a> (maks. 1 zapytanie/s, bez autouzupełniania)</td>
+                            <td>© OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://mapterhorn.com">Mapterhorn</a></td>
+                            <td>Teren 3D, cieniowanie, poziomice</td>
+                            <td>Zbudowane ze 151 otwartych zbiorów danych wysokościowych, głównie CC BY 4.0, licencje rządowe
+                                i domena publiczna (w Polsce: GUGiK, otwarte dane publiczne). <a
+                                    href="https://download.mapterhorn.com/attribution.json">Pełna lista źródeł i
+                                    licencji</a></td>
+                            <td>© Mapterhorn i jego <a href="https://mapterhorn.com/attribution/">źródła danych</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://openfreemap.org">OpenFreeMap</a></td>
+                            <td>Budynki 3D</td>
+                            <td>Schemat OpenMapTiles, dane OpenStreetMap (ODbL 1.0). Bezpłatne, także komercyjnie.</td>
+                            <td>OpenFreeMap © OpenMapTiles Data from OpenStreetMap</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9">Esri
+                                    World Imagery</a></td>
+                            <td>Mapa bazowa „Zdjęcia lotnicze”</td>
+                            <td><a href="https://www.esri.com/en-us/legal/terms/full-master-agreement">Esri Master License
+                                    Agreement</a>; patrz zastrzeżenia powyżej</td>
+                            <td>Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community</td>
+                        </tr>
+                        <tr>
+                            <td>Esri World Transportation, World Boundaries and Places</td>
+                            <td>Nakładki „Drogi”, „Nazwy miejscowości i granice”</td>
+                            <td><a href="https://www.esri.com/en-us/legal/terms/full-master-agreement">Esri Master License
+                                    Agreement</a>; patrz zastrzeżenia powyżej</td>
+                            <td>Esri, HERE, Garmin, © OpenStreetMap contributors, and the GIS user community</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://opentopomap.org/about">OpenTopoMap</a></td>
+                            <td>Mapa bazowa „OpenTopoMap”</td>
+                            <td>CC BY-SA</td>
+                            <td>Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.openrailwaymap.org">OpenRailwayMap</a></td>
+                            <td>Nakładka „Koleje” (4 style)</td>
+                            <td>Kafelki: CC BY-SA 2.0; dane: ODbL 1.0. Bezpłatne tylko dla małych, publicznych,
+                                niekomercyjnych aplikacji. <a
+                                    href="https://wiki.openstreetmap.org/wiki/OpenRailwayMap/API">Warunki</a></td>
+                            <td>Data © OpenStreetMap contributors, Style: CC-BY-SA 2.0 OpenRailwayMap</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.cyclosm.org">CyclOSM</a> (kafelki hostuje OpenStreetMap France)</td>
+                            <td>Nakładka „Drogi i ścieżki rowerowe”</td>
+                            <td>Kafelki: CC BY-SA 2.0; dane: ODbL 1.0</td>
+                            <td>CyclOSM, © OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://waymarkedtrails.org">Waymarked Trails</a></td>
+                            <td>Nakładki „Szlaki piesze”, „Oznakowane szlaki rowerowe”, „Szlaki MTB”</td>
+                            <td>Dane: ODbL 1.0 (OpenStreetMap); licencja kafelków nie jest publicznie podana</td>
+                            <td>© Waymarked Trails, © OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.opensnowmap.org">OpenSnowMap</a></td>
+                            <td>Nakładka „Trasy narciarskie”</td>
+                            <td>Dane: ODbL 1.0 (OpenStreetMap); licencja kafelków nie jest publicznie podana</td>
+                            <td>© OpenSnowMap, © OpenStreetMap contributors</td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://www.openseamap.org">OpenSeaMap</a></td>
+                            <td>Nakładka „Znaki nawigacyjne”</td>
+                            <td>CC BY-SA 2.0</td>
+                            <td>© OpenSeaMap contributors</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Oprogramowanie</h2>
+            <ul>
+                <li><a href="https://maplibre.org">MapLibre GL JS</a> 5.6.0 – BSD 3-Clause (ładowane z unpkg.com)</li>
+                <li><a href="https://github.com/onthegomap/maplibre-contour">maplibre-contour</a> 0.0.5 – BSD 3-Clause
+                    (ładowane z unpkg.com)</li>
+                <li>Ikony <a href="https://fonts.google.com/icons">Material Symbols</a> – Apache 2.0 (ładowane z Google
+                    Fonts)</li>
+                <li>Glify Noto Sans do etykiet poziomic – SIL Open Font License 1.1 (z demotiles.maplibre.org)</li>
+            </ul>
+
+            <h2>Kontakt i poprawki</h2>
+            <ul>
+                <li>Problemy z aplikacją: <a href="https://github.com/kosteck/open-3d-terrain-map/issues">GitHub
+                        Issues</a></li>
+                <li>Błędy w danych mapy (drogi, szlaki, nazwy, budynki): <a
+                        href="https://www.openstreetmap.org/fixthemap">zgłoś lub popraw w OpenStreetMap</a></li>
+            </ul>
+        </article>
+    </main>
+
+    <script>
+        // Same language rules as the app: #lang=… (set when the app links here) > browser language > English.
+        const LANGUAGES = ['en', 'pl'];
+
+        function detectLanguage() {
+            const fromHash = new URLSearchParams(window.location.hash.slice(1)).get('lang');
+            if (LANGUAGES.includes(fromHash)) return fromHash;
+            const preferred = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+            return preferred.toLowerCase().startsWith('pl') ? 'pl' : 'en';
+        }
+
+        function showLanguage(language) {
+            document.documentElement.lang = language;
+            document.querySelectorAll('article[data-language]').forEach((article) => {
+                article.hidden = article.dataset.language !== language;
+            });
+            document.title = language === 'pl'
+                ? 'O mapie, licencje i warunki – Open 3D Terrain Map'
+                : 'About, licences and terms – Open 3D Terrain Map';
+            // Keep the language when going back to the map.
+            document.querySelectorAll('.back-link').forEach((link) => {
+                link.href = `./#lang=${language}`;
+            });
+        }
+
+        document.querySelectorAll('.language-switch').forEach((button) => {
+            button.addEventListener('click', () => {
+                const language = button.dataset.target;
+                window.history.replaceState(null, '', `#lang=${language}`);
+                showLanguage(language);
+            });
+        });
+
+        showLanguage(detectLanguage());
+    </script>
+</body>
+
+</html>

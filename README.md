@@ -2,7 +2,9 @@
 
 Pełnoekranowa mapa 3D w jednym pliku `index.html` (MapLibre GL JS + dane wysokości [Mapterhorn](https://mapterhorn.com)). Interfejs po angielsku, po polsku dla przeglądarek z polskim językiem; przełącznik EN/PL w panelu.
 
-**Na żywo:** https://kosteck.github.io/open-3d-terrain-map/
+**Na żywo:** https://kosteck.github.io/open-3d-terrain-map/ · **Licencje i warunki użycia:** [about.html](https://kosteck.github.io/open-3d-terrain-map/about.html)
+
+> Projekt hobbystyczny, tylko do osobistego, niekomercyjnego użytku. Nie do nawigacji ani decyzji związanych z bezpieczeństwem.
 
 - **Mapa bazowa:** OpenStreetMap, zdjęcia lotnicze (Esri World Imagery), OpenTopoMap, brak.
 - **Nakładki (dowolnie wiele):** drogi, koleje (4 style OpenRailwayMap: infrastruktura, prędkości, sygnalizacja, elektryfikacja), szlaki piesze, oznakowane szlaki rowerowe, drogi i ścieżki rowerowe (CyclOSM), MTB, trasy narciarskie, znaki nawigacyjne (OpenSeaMap), nazwy miejscowości i granice.
@@ -28,7 +30,7 @@ Strona jest publikowana przez GitHub Pages z gałęzi `main` (folder `/`); każd
 
 ## Źródła danych i licencje
 
-Atrybucje wyświetlają się w prawym dolnym rogu mapy (tylko dla włączonych warstw). Przy publicznym użyciu sprawdź warunki dostawców:
+Pełna lista dostawców, licencji, zastrzeżeń i informacji o prywatności: [about.html](about.html). Atrybucje wyświetlają się w prawym dolnym rogu mapy (tylko dla włączonych warstw). Warunki dostawców:
 
 - Mapterhorn (wysokości): https://mapterhorn.com/attribution
 - OpenStreetMap kafelki: https://operations.osmfoundation.org/policies/tiles/
