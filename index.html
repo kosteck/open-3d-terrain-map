@@ -24,6 +24,8 @@
         #map {
             position: absolute;
             inset: 0;
+            /* "Space" around the globe: the canvas is transparent outside the planet. */
+            background: #0b1020;
         }
 
         #side-panel {
@@ -912,7 +914,10 @@
                 ...(appState.terrain.has('terrain3d') ? { terrain: TERRAIN_3D_SPECIFICATION } : {}),
                 // Globe when zoomed out; MapLibre switches to flat Mercator by itself when zooming in.
                 projection: { type: 'globe' },
-                sky: {}
+                sky: {
+                    // Atmosphere glow around the globe when zoomed out, fading out as the map turns flat.
+                    'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 1, 7, 0]
+                }
             };
         }
 
