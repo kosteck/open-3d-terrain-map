@@ -4,7 +4,7 @@ I kept coming across great open maps – [Mapterhorn](https://mapterhorn.com), [
 
 It is a full-screen 3D map in a single `index.html` file (MapLibre GL JS + [Mapterhorn](https://mapterhorn.com) elevation data). The interface is in English, or in Polish for browsers set to Polish; there is an EN/PL switch in the panel.
 
-**Live:** https://kosteck.github.io/open-3d-terrain-map/ · **Licences and terms of use:** [about.html](https://kosteck.github.io/open-3d-terrain-map/about.html)
+**Live:** https://open3dterrainmap.org · **Licences and terms of use:** [open3dterrainmap.org/about.html](https://open3dterrainmap.org/about.html)
 
 > Hobby project for personal, non-commercial use only. Not for navigation or safety-critical decisions.
 
@@ -32,11 +32,11 @@ Opening `index.html` directly from disk (`file://`) does **not** work: the brows
 
 ## Deployment
 
-The site is published with GitHub Pages from the `main` branch (folder `/`) at https://kosteck.github.io/open-3d-terrain-map/; every push to `main` updates it within about a minute.
+The site is published with GitHub Pages from the `main` branch (folder `/`) under the custom domain https://open3dterrainmap.org (set by the `CNAME` file); every push to `main` updates it within about a minute. The old address https://kosteck.github.io/open-3d-terrain-map/ redirects there.
 
 ## Data sources and licences
 
-The full list of providers, licences, disclaimers and privacy notes is on the [about page](https://kosteck.github.io/open-3d-terrain-map/about.html). Attributions are shown in the bottom-right corner of the map (only for layers that are switched on). Providers' terms:
+The full list of providers, licences, disclaimers and privacy notes is on the [about page](https://open3dterrainmap.org/about.html). Attributions are shown in the bottom-right corner of the map (only for layers that are switched on). Providers' terms:
 
 - Mapterhorn (elevation): https://mapterhorn.com/attribution
 - OpenStreetMap tiles: https://operations.osmfoundation.org/policies/tiles/
