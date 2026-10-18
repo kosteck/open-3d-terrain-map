@@ -54,6 +54,16 @@
             gap: 4px;
         }
 
+        /* Own clear button instead of the native one: Android draws it tiny, iOS Safari not at all. */
+        #search-input::-webkit-search-cancel-button {
+            -webkit-appearance: none;
+            display: none;
+        }
+
+        #search-clear-button[hidden] {
+            display: none;
+        }
+
         #search-input {
             flex: 1;
             min-width: 0;
@@ -78,6 +88,7 @@
 
         #search-results li button {
             display: block;
+            color: inherit; /* iOS Safari otherwise renders button text in its blue tint */
             width: 100%;
             text-align: left;
             border: 0;
@@ -329,6 +340,9 @@
         <div class="panel-card" id="search-card">
             <form id="search-form" role="search">
                 <input id="search-input" type="search" autocomplete="off" spellcheck="false">
+                <button type="button" class="icon-button" id="search-clear-button" hidden>
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
                 <button type="submit" class="icon-button" id="search-button">
                     <span class="material-symbols-outlined" aria-hidden="true">search</span>
                 </button>
@@ -421,6 +435,7 @@
                 searchPlaceholder: 'Search place, region, country…',
                 searchButton: 'Search (OpenStreetMap Nominatim) – shortcut: /',
                 searchOpen: 'Search places',
+                searchClear: 'Clear search',
                 searchNoResults: 'Nothing found',
                 searchFailed: 'Search failed, please try again',
                 searchCoordinates: 'Coordinates',
@@ -465,6 +480,7 @@
                 searchPlaceholder: 'Szukaj miejscowości, regionu, kraju…',
                 searchButton: 'Szukaj (OpenStreetMap Nominatim) – skrót: /',
                 searchOpen: 'Szukaj miejsc',
+                searchClear: 'Wyczyść wyszukiwanie',
                 searchNoResults: 'Nic nie znaleziono',
                 searchFailed: 'Wyszukiwanie nie powiodło się, spróbuj ponownie',
                 searchCoordinates: 'Współrzędne',
@@ -981,6 +997,7 @@
             searchInput.setAttribute('aria-label', t.searchPlaceholder);
             document.getElementById('search-button').setAttribute('aria-label', t.searchButton);
             document.getElementById('search-open-button').setAttribute('aria-label', t.searchOpen);
+            document.getElementById('search-clear-button').setAttribute('aria-label', t.searchClear);
 
             const languageToggle = document.getElementById('language-toggle');
             languageToggle.setAttribute('aria-label', t.languageToggleTooltip);
@@ -1098,6 +1115,11 @@
         function clearSearch() {
             document.getElementById('search-results').replaceChildren();
             if (searchResultMarker) searchResultMarker.remove();
+            updateSearchClearButton();
+        }
+
+        function updateSearchClearButton() {
+            document.getElementById('search-clear-button').hidden = !isSearchInUse();
         }
 
         function showSearchMessage(message) {
@@ -1105,6 +1127,7 @@
             item.className = 'search-message';
             item.textContent = message;
             document.getElementById('search-results').replaceChildren(item);
+            updateSearchClearButton();
         }
 
         function goToSearchResult(result) {
@@ -1133,6 +1156,7 @@
                 return item;
             });
             document.getElementById('search-results').replaceChildren(...items);
+            updateSearchClearButton();
         }
 
         async function runSearch(query) {
@@ -1217,7 +1241,23 @@
             if (query) runSearch(query);
         });
         document.getElementById('search-input').addEventListener('input', (event) => {
-            if (!event.target.value) clearSearch();
+            if (event.target.value) {
+                updateSearchClearButton();
+            } else {
+                clearSearch();
+            }
+        });
+        document.getElementById('search-clear-button').addEventListener('click', () => {
+            const searchInput = document.getElementById('search-input');
+            searchInput.value = '';
+            clearSearch();
+            if (narrowScreenQuery.matches) {
+                // Phones: done searching – drop the keyboard and fold the search away.
+                searchInput.blur();
+                collapseSearchIfIdle();
+            } else {
+                searchInput.focus();
+            }
         });
         document.getElementById('search-input').addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
