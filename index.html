@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Open 3D Terrain Map</title>
+    <!-- Versions pinned to the pair used by the Mapterhorn examples (hillshade-method 'igor' needs maplibre-gl >= 5.5). -->
+    <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-contour@0.0.5/dist/index.min.js"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+
+        #map {
+            position: absolute;
+            inset: 0;
+        }
+
+        #layer-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 6px;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            max-width: calc(100vw - 80px);
+        }
+
+        #layer-panel summary {
+            cursor: pointer;
+            padding: 8px 12px;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        #layer-panel .panel-body {
+            padding: 0 12px 10px;
+        }
+
+        #layer-panel fieldset {
+            border: 0;
+            margin: 0 0 8px;
+            padding: 0;
+        }
+
+        #layer-panel legend {
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #555;
+            padding: 0;
+            margin-bottom: 4px;
+        }
+
+        #layer-panel label {
+            display: block;
+            padding: 3px 0;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        #layer-panel input[type="range"] {
+            width: 100%;
+            margin: 2px 0 0;
+        }
+
+        #layer-panel .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+        }
+
+        #layer-panel fieldset:disabled {
+            opacity: 0.45;
+        }
+
+        #layer-panel .hint {
+            font-size: 12px;
+            color: #666;
+            margin: 6px 0 0;
+            max-width: 220px;
+            white-space: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <details id="layer-panel" open>
+        <summary>Warstwy</summary>
+        <div class="panel-body">
+            <fieldset>
+                <legend>Mapa bazowa</legend>
+                <label><input type="radio" name="base" value="osm" checked> OpenStreetMap</label>
+                <label><input type="radio" name="base" value="aerial"> Zdjęcia lotnicze</label>
+                <label><input type="radio" name="base" value="opentopomap"> OpenTopoMap</label>
+                <label><input type="radio" name="base" value="openrailwaymap"> OpenRailwayMap</label>
+                <label><input type="radio" name="base" value="none"> Brak</label>
+            </fieldset>
+            <fieldset>
+                <legend>Nakładka wysokościowa</legend>
+                <label><input type="radio" name="relief" value="hillshade"> Cieniowanie</label>
+                <label><input type="radio" name="relief" value="contours"> Poziomice</label>
+                <label><input type="radio" name="relief" value="both" checked> Oba</label>
+                <label><input type="radio" name="relief" value="none"> Brak</label>
+            </fieldset>
+            <fieldset id="contour-density-fieldset">
+                <legend>Gęstość poziomic</legend>
+                <input type="range" id="contour-density" min="1" max="5" step="1" value="3"
+                    aria-describedby="contour-interval-info">
+                <div class="range-labels"><span>rzadziej</span><span>gęściej</span></div>
+                <div id="contour-interval-info" class="hint"></div>
+            </fieldset>
+            <p class="hint">Obrót / pochylenie: prawy przycisk myszy lub Ctrl + przeciąganie. Przycisk ⛰ po prawej włącza/wyłącza 3D.</p>
+        </div>
+    </details>
+
+    <script type="text/javascript">
+        const OSM_ATTRIBUTION = '<a href="https://www.openstreetmap.org/copyright">&copy; OpenStreetMap Contributors</a>';
+
+        const BASE_MAP_IDS = ['osm', 'aerial', 'opentopomap', 'openrailwaymap', 'none'];
+        const RELIEF_MODES = ['hillshade', 'contours', 'both', 'none'];
+
+        // --- Contour density ---
+        // Intervals follow a 1-2-5 ladder; a contour step's major (labelled) line is two rungs up (1->5, 20->100).
+        const CONTOUR_INTERVAL_LADDER_M = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
+        // Ladder index of the minor interval per zoom at default density (3): z13 = 20 m, z16 = 5 m.
+        const CONTOUR_DEFAULT_LADDER_INDEX_BY_ZOOM = { 10: 7, 11: 6, 12: 5, 13: 4, 14: 4, 15: 3, 16: 2 };
+        const CONTOUR_DENSITY_MIN = 1;
+        const CONTOUR_DENSITY_MAX = 5; // at z16+ this reaches the 1 m rung
+        const CONTOUR_DENSITY_DEFAULT = 3;
+
+        function contourIntervalsForZoom(zoomKey, density) {
+            const index = Math.min(
+                Math.max(CONTOUR_DEFAULT_LADDER_INDEX_BY_ZOOM[zoomKey] + CONTOUR_DENSITY_DEFAULT - density, 0),
+                CONTOUR_INTERVAL_LADDER_M.length - 3
+            );
+            return [CONTOUR_INTERVAL_LADDER_M[index], CONTOUR_INTERVAL_LADDER_M[index + 2]];
+        }
+
+        function contourThresholdsForDensity(density) {
+            const thresholds = {};
+            for (const zoomKey of Object.keys(CONTOUR_DEFAULT_LADDER_INDEX_BY_ZOOM)) {
+                thresholds[zoomKey] = contourIntervalsForZoom(zoomKey, density);
+            }
+            return thresholds;
+        }
+
+        // maplibre-contour applies the threshold with the largest zoom key <= current zoom.
+        function contourIntervalsAtMapZoom(zoom, density) {
+            const zoomKeys = Object.keys(CONTOUR_DEFAULT_LADDER_INDEX_BY_ZOOM).map(Number);
+            const zoomKey = zoomKeys.filter((key) => key <= Math.floor(zoom)).pop();
+            return zoomKey === undefined ? null : contourIntervalsForZoom(zoomKey, density);
+        }
+
+        // Raster base map layers; every id here is both a source id and a layer id.
+        const BASE_MAP_SOURCES = {
+            osm: {
+                type: 'raster',
+                tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                tileSize: 256,
+                maxzoom: 19,
+                attribution: OSM_ATTRIBUTION
+            },
+            aerial: {
+                type: 'raster',
+                tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+                tileSize: 256,
+                maxzoom: 19,
+                attribution: 'Zdjęcia: &copy; Esri, Maxar, Earthstar Geographics, GIS User Community'
+            },
+            opentopomap: {
+                type: 'raster',
+                tiles: [
+                    'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+                    'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
+                    'https://c.tile.opentopomap.org/{z}/{x}/{y}.png'
+                ],
+                tileSize: 256,
+                maxzoom: 17,
+                attribution: OSM_ATTRIBUTION + ', SRTM | Styl: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'
+            },
+            openrailwaymap: {
+                // Transparent overlay tiles: shown on top of the plain background colour.
+                type: 'raster',
+                tiles: [
+                    'https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
+                    'https://b.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
+                    'https://c.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png'
+                ],
+                tileSize: 256,
+                maxzoom: 19,
+                attribution: OSM_ATTRIBUTION + ', Styl: <a href="https://www.openrailwaymap.org/">OpenRailwayMap</a> (CC-BY-SA)'
+            }
+        };
+
+        // --- Layer state <-> URL hash (alongside MapLibre's own "map=" parameter) ---
+
+        function readLayerStateFromHash() {
+            const params = new URLSearchParams(window.location.hash.slice(1));
+            const base = params.get('base');
+            const relief = params.get('relief');
+            const density = Number(params.get('density'));
+            return {
+                base: BASE_MAP_IDS.includes(base) ? base : 'osm',
+                relief: RELIEF_MODES.includes(relief) ? relief : 'both',
+                density: Number.isInteger(density) && density >= CONTOUR_DENSITY_MIN && density <= CONTOUR_DENSITY_MAX
+                    ? density
+                    : CONTOUR_DENSITY_DEFAULT
+            };
+        }
+
+        function writeLayerStateToHash(layerState) {
+            const params = new URLSearchParams(window.location.hash.slice(1));
+            params.set('base', layerState.base);
+            params.set('relief', layerState.relief);
+            params.set('density', layerState.density);
+            // URLSearchParams encodes "/" in the map= value; MapLibre writes it unencoded, so keep that form.
+            const hash = '#' + params.toString().replace(/%2F/g, '/');
+            window.history.replaceState(window.history.state, '', hash);
+        }
+
+        // --- DEM sources: terrain and hillshade read Mapterhorn TileJSON; contours use maplibre-contour's DemSource ---
+
+        // Mapterhorn serves z16 (~1 m/px) where high-res data exists (e.g. Poland, Alps) and only up to z12 elsewhere;
+        // there, contour tiles above z12 404 and stay empty. z16 is needed for meaningful 1 m contours.
+        const CONTOUR_DEM_MAXZOOM = 16;
+
+        const demSource = new mlcontour.DemSource({
+            url: 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',
+            encoding: 'terrarium',
+            maxzoom: CONTOUR_DEM_MAXZOOM,
+            worker: true
+        });
+        demSource.setupMaplibre(maplibregl);
+
+        function contourTileUrlForDensity(density) {
+            return demSource.contourProtocolUrl({
+                thresholds: contourThresholdsForDensity(density),
+                elevationKey: 'ele',
+                levelKey: 'level',
+                contourLayer: 'contours',
+                buffer: 1,
+                overzoom: 2
+            });
+        }
+
+        const layerState = readLayerStateFromHash();
+
+        const baseMapLayers = Object.keys(BASE_MAP_SOURCES).map((id) => ({
+            id,
+            type: 'raster',
+            source: id,
+            layout: { visibility: id === layerState.base ? 'visible' : 'none' }
+        }));
+
+        const map = new maplibregl.Map({
+            container: 'map',
+            hash: 'map',
+            // Default view: Innsbruck, as in the Mapterhorn examples.
+            center: [11.392208, 47.276486],
+            zoom: 13,
+            pitch: 60,
+            bearing: 7.8,
+            maxPitch: 85,
+            style: {
+                version: 8,
+                glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+                sources: {
+                    ...BASE_MAP_SOURCES,
+                    terrainSource: {
+                        type: 'raster-dem',
+                        url: 'https://tiles.mapterhorn.com/tilejson.json'
+                    },
+                    // Separate from terrainSource on purpose: MapLibre recommends not sharing one raster-dem source
+                    // between terrain and hillshade.
+                    hillshadeSource: {
+                        type: 'raster-dem',
+                        url: 'https://tiles.mapterhorn.com/tilejson.json'
+                    },
+                    contourSource: {
+                        type: 'vector',
+                        tiles: [contourTileUrlForDensity(layerState.density)],
+                        minzoom: 10,
+                        maxzoom: CONTOUR_DEM_MAXZOOM + 2 // overzoom: 2
+                    }
+                },
+                layers: [
+                    {
+                        id: 'background',
+                        type: 'background',
+                        paint: { 'background-color': '#f2efe9' }
+                    },
+                    ...baseMapLayers,
+                    {
+                        id: 'hillshade',
+                        type: 'hillshade',
+                        source: 'hillshadeSource',
+                        paint: { 'hillshade-shadow-color': '#473B24' }
+                    },
+                    {
+                        id: 'contour-lines',
+                        type: 'line',
+                        source: 'contourSource',
+                        'source-layer': 'contours',
+                        paint: {
+                            'line-color': 'rgb(215, 151, 60)',
+                            'line-width': ['match', ['get', 'level'], 1, 1.2, 0.6]
+                        }
+                    },
+                    {
+                        id: 'contour-labels',
+                        type: 'symbol',
+                        source: 'contourSource',
+                        'source-layer': 'contours',
+                        filter: ['>', ['get', 'level'], 0],
+                        layout: {
+                            'symbol-placement': 'line',
+                            'text-size': 13,
+                            'text-field': ['concat', ['number-format', ['get', 'ele'], {}], ' m'],
+                            'text-font': ['Noto Sans Regular']
+                        },
+                        paint: {
+                            'text-color': 'rgb(150, 100, 35)',
+                            'text-halo-color': 'white',
+                            'text-halo-width': 1.5
+                        }
+                    }
+                ],
+                terrain: {
+                    source: 'terrainSource',
+                    exaggeration: 1
+                },
+                sky: {}
+            }
+        });
+
+        map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+        map.addControl(new maplibregl.TerrainControl({ source: 'terrainSource', exaggeration: 1 }), 'top-right');
+        map.addControl(new maplibregl.FullscreenControl(), 'top-right');
+        map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right');
+        map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+
+        // --- Layer switching ---
+
+        function applyBaseMap(baseMapId) {
+            for (const id of Object.keys(BASE_MAP_SOURCES)) {
+                map.setLayoutProperty(id, 'visibility', id === baseMapId ? 'visible' : 'none');
+            }
+        }
+
+        function applyRelief(reliefMode) {
+            const showHillshade = reliefMode === 'hillshade' || reliefMode === 'both';
+            const showContours = reliefMode === 'contours' || reliefMode === 'both';
+            map.setLayoutProperty('hillshade', 'visibility', showHillshade ? 'visible' : 'none');
+            map.setLayoutProperty('contour-lines', 'visibility', showContours ? 'visible' : 'none');
+            map.setLayoutProperty('contour-labels', 'visibility', showContours ? 'visible' : 'none');
+            document.getElementById('contour-density-fieldset').disabled = !showContours;
+        }
+
+        function applyContourDensity(density) {
+            map.getSource('contourSource').setTiles([contourTileUrlForDensity(density)]);
+            updateContourIntervalInfo();
+        }
+
+        function updateContourIntervalInfo() {
+            const intervals = contourIntervalsAtMapZoom(map.getZoom(), layerState.density);
+            document.getElementById('contour-interval-info').textContent = intervals
+                ? `W środku widoku: co ${intervals[0]} m, pogrubione co ${intervals[1]} m`
+                : 'Poziomice widoczne od zoomu 10';
+        }
+
+        function syncPanelToState() {
+            document.querySelector(`input[name="base"][value="${layerState.base}"]`).checked = true;
+            document.querySelector(`input[name="relief"][value="${layerState.relief}"]`).checked = true;
+            document.getElementById('contour-density').value = layerState.density;
+        }
+
+        syncPanelToState();
+
+        // 'style.load' fires once layers exist; 'load' would wait for the first full set of tiles.
+        map.once('style.load', () => {
+            applyRelief(layerState.relief);
+            updateContourIntervalInfo();
+            writeLayerStateToHash(layerState);
+
+            map.on('zoomend', updateContourIntervalInfo);
+
+            document.getElementById('contour-density').addEventListener('input', (event) => {
+                layerState.density = Number(event.target.value);
+                applyContourDensity(layerState.density);
+                writeLayerStateToHash(layerState);
+            });
+
+            document.querySelectorAll('input[name="base"]').forEach((input) => {
+                input.addEventListener('change', () => {
+                    layerState.base = input.value;
+                    applyBaseMap(layerState.base);
+                    writeLayerStateToHash(layerState);
+                });
+            });
+
+            document.querySelectorAll('input[name="relief"]').forEach((input) => {
+                input.addEventListener('change', () => {
+                    layerState.relief = input.value;
+                    applyRelief(layerState.relief);
+                    writeLayerStateToHash(layerState);
+                });
+            });
+        });
+
+        // Collapse the panel by default on narrow screens so the map stays usable.
+        if (window.matchMedia('(max-width: 600px)').matches) {
+            document.getElementById('layer-panel').open = false;
+        }
+    </script>
+</body>
+
+</html>
