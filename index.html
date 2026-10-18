@@ -5,6 +5,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Open 3D Terrain Map</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <meta name="theme-color" content="#1a73e8" />
+    <meta name="apple-mobile-web-app-title" content="Terrain Map" />
+    <meta name="description" content="Full-screen 3D terrain map from open data: hillshade, contour lines down to 1 m, 3D buildings, aerial imagery, railways, hiking and cycling routes and ski pistes, on a globe." />
+    <!-- Link previews (Messenger, WhatsApp, Slack, social media). og:image must be an absolute URL. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Open 3D Terrain Map" />
+    <meta property="og:title" content="Open 3D Terrain Map" />
+    <meta property="og:description" content="Full-screen 3D terrain map from open data: hillshade, contour lines down to 1 m, 3D buildings, aerial imagery, railways, hiking and cycling routes and ski pistes, on a globe." />
+    <meta property="og:url" content="https://open3dterrainmap.org/" />
+    <meta property="og:image" content="https://open3dterrainmap.org/assets/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="3D terrain map of Innsbruck and the Alps with hillshade and contour lines" />
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- Library versions: see "Dependencies" in CLAUDE.md before changing. maplibre-gl 6.x ships only as an ES module,
          imported at the top of the app script below; maplibre-contour is still a UMD global (mlcontour). -->
     <link href="https://unpkg.com/maplibre-gl@6.12.0/dist/maplibre-gl.css" rel="stylesheet" />
@@ -109,6 +127,34 @@
             display: block;
             font-size: 11px;
             color: #666;
+        }
+
+        /* Shown instead of the map when the browser cannot run it (no WebGL 2). */
+        #startup-error {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            text-align: center;
+            color: #e8eaed;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        #startup-error div {
+            max-width: 460px;
+        }
+
+        #startup-error h1 {
+            font-size: 20px;
+            margin: 0 0 8px;
+        }
+
+        #startup-error a {
+            color: #8ab4f8;
         }
 
         #search-results .search-message {
@@ -435,6 +481,8 @@
                 denser: 'denser',
                 contourInterval: (minor, major) => `At view centre: every ${minor} m, bold every ${major} m`,
                 contourBelowMinZoom: 'Contour lines appear from zoom 10',
+                webglUnsupportedTitle: 'The map can’t start in this browser',
+                webglUnsupported: 'It needs WebGL 2 graphics, which this browser or device doesn’t provide, or hardware acceleration is switched off. Try an up-to-date Chrome, Firefox, Edge or Safari, or turn on hardware acceleration in the browser settings.',
                 navigationHint: 'Rotate / tilt: right mouse button or Ctrl + drag.',
                 searchPlaceholder: 'Search place, region, country…',
                 searchButton: 'Search (OpenStreetMap Nominatim) – shortcut: /',
@@ -480,6 +528,8 @@
                 denser: 'gęściej',
                 contourInterval: (minor, major) => `W środku widoku: co ${minor} m, pogrubione co ${major} m`,
                 contourBelowMinZoom: 'Poziomice widoczne od zoomu 10',
+                webglUnsupportedTitle: 'Mapa nie może się uruchomić w tej przeglądarce',
+                webglUnsupported: 'Potrzebuje grafiki WebGL 2, której ta przeglądarka lub urządzenie nie obsługuje, albo wyłączone jest przyspieszenie sprzętowe. Spróbuj aktualnej wersji Chrome, Firefoksa, Edge lub Safari albo włącz przyspieszenie sprzętowe w ustawieniach przeglądarki.',
                 navigationHint: 'Obrót / pochylenie: prawy przycisk myszy lub Ctrl + przeciąganie.',
                 searchPlaceholder: 'Szukaj miejscowości, regionu, kraju…',
                 searchButton: 'Szukaj (OpenStreetMap Nominatim) – skrót: /',
@@ -921,6 +971,21 @@
             };
         }
 
+        // MapLibre 6 requires WebGL 2. Without it the page would stay blank, so explain instead and stop here.
+        if (!document.createElement('canvas').getContext('webgl2')) {
+            const startupError = document.createElement('div');
+            startupError.id = 'startup-error';
+            startupError.innerHTML = '<div><h1></h1><p></p><p><a></a></p></div>';
+            startupError.querySelector('h1').textContent = t.webglUnsupportedTitle;
+            startupError.querySelector('p').textContent = t.webglUnsupported;
+            const aboutLink = startupError.querySelector('a');
+            aboutLink.href = aboutPageUrl();
+            aboutLink.textContent = t.aboutTooltip;
+            document.getElementById('side-panel').style.display = 'none'; // its CSS display:flex would override [hidden]
+            document.body.append(startupError);
+            throw new Error('WebGL 2 is not available – map not started');
+        }
+
         const map = new maplibregl.Map({
             container: 'map',
             hash: 'map',
@@ -1324,6 +1389,8 @@
             openSearch();
         });
     </script>
+    <!-- Cloudflare Web Analytics: cookieless visit counts (see "Privacy" on about.html). -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8f7ce4dfdf664256aeab2683aaccb291"}'></script>
 </body>
 
 </html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found – Open 3D Terrain Map</title>
+    <!-- GitHub Pages serves this file for any unknown path, so every URL here must be absolute from the site root. -->
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <meta name="theme-color" content="#1a73e8" />
+    <meta name="robots" content="noindex" />
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            box-sizing: border-box;
+            background: #0b1020;
+            color: #e8eaed;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            text-align: center;
+        }
+
+        main {
+            max-width: 440px;
+        }
+
+        img {
+            width: 96px;
+            height: 96px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 20px 0 8px;
+        }
+
+        p {
+            margin: 0 0 24px;
+            color: #bdc1c6;
+            line-height: 1.5;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 6px;
+            background: #1a73e8;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a.button:hover {
+            background: #1765cc;
+        }
+
+        article[hidden] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <img src="/assets/favicon.svg" alt="" />
+        <article lang="en" data-language="en">
+            <h1>Off the map</h1>
+            <p>This page doesn’t exist. Maybe the link is mistyped, or the page has moved.</p>
+            <a class="button" href="/">Go to the map</a>
+        </article>
+        <article lang="pl" data-language="pl" hidden>
+            <h1>Poza mapą</h1>
+            <p>Ta strona nie istnieje. Może w linku jest literówka albo strona została przeniesiona.</p>
+            <a class="button" href="/">Przejdź do mapy</a>
+        </article>
+    </main>
+
+    <script>
+        // Same rule as the app: Polish for browsers preferring Polish, otherwise English.
+        const preferred = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+        const language = preferred.toLowerCase().startsWith('pl') ? 'pl' : 'en';
+        document.documentElement.lang = language;
+        document.querySelectorAll('article[data-language]').forEach((article) => {
+            article.hidden = article.dataset.language !== language;
+        });
+        if (language === 'pl') document.title = 'Nie znaleziono strony – Open 3D Terrain Map';
+    </script>
+    <!-- Cloudflare Web Analytics: cookieless visit counts (see "Privacy" on about.html). -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8f7ce4dfdf664256aeab2683aaccb291"}'></script>
+</body>
+
+</html>

@@ -8,6 +8,8 @@ It is a full-screen 3D map in a single `index.html` file (MapLibre GL JS + [Mapt
 
 > Hobby project for personal, non-commercial use only. Not for navigation or safety-critical decisions.
 
+![Open 3D Terrain Map: 3D terrain of Innsbruck with hillshade, contour lines and the layer panel](assets/og-image.jpg)
+
 ## Features
 
 - **Base map:** OpenStreetMap, aerial imagery (Esri World Imagery), OpenTopoMap, none.

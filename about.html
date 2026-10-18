@@ -5,6 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>About, licences and terms – Open 3D Terrain Map</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <meta name="theme-color" content="#1a73e8" />
+    <meta name="description" content="Licences, data sources, terms of use and privacy of Open 3D Terrain Map." />
     <style>
         :root {
             --text: #222;
@@ -33,6 +39,18 @@
         main {
             max-width: 920px;
             margin: 0 auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand img {
+            width: 40px;
+            height: 40px;
+            flex: none;
         }
 
         header.page-header {
@@ -150,7 +168,10 @@
         <article lang="en" data-language="en">
             <a class="back-link" href="./">← Back to the map</a>
             <header class="page-header">
-                <h1>About, licences and terms of use</h1>
+                <div class="brand">
+                    <img src="assets/favicon.svg" alt="Open 3D Terrain Map logo" />
+                    <h1>About, licences and terms of use</h1>
+                </div>
                 <button type="button" id="language-switch-en" class="language-switch" data-target="pl">Polski</button>
             </header>
             <p class="updated">Last updated: 18 October 2026</p>
@@ -183,12 +204,16 @@
             </div>
 
             <h2>Privacy</h2>
-            <p>The application itself sets no cookies, uses no analytics and has no server of its own. However, to show
-                the map your browser connects directly to the services listed below; each of them receives your IP
+            <p>The application itself sets no cookies and has no server of its own. To know roughly how many people
+                use it, it counts visits with <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web
+                    Analytics</a>, which uses no cookies and no fingerprinting and does not track you across sites;
+                Cloudflare receives the page address, the referring page, the browser and device type and the country
+                derived from your IP address. To show the map your browser connects directly to the services listed below; each of them receives your IP
                 address and learns which map area you are viewing. Search queries are sent to
                 OpenStreetMap Nominatim. The location from the “find my location” button is used only in your browser to
                 centre the map and is not sent anywhere by the application.</p>
-            <p class="muted">Contacted hosts: open3dterrainmap.org (GitHub Pages hosting), unpkg.com, fonts.googleapis.com,
+            <p class="muted">Contacted hosts: open3dterrainmap.org (GitHub Pages hosting), static.cloudflareinsights.com and cloudflareinsights.com
+                (Cloudflare Web Analytics), unpkg.com, fonts.googleapis.com,
                 fonts.gstatic.com, demotiles.maplibre.org, tiles.mapterhorn.com, tiles.openfreemap.org,
                 tile.openstreetmap.org, nominatim.openstreetmap.org, server.arcgisonline.com, tile.opentopomap.org,
                 tiles.openrailwaymap.org, tile.waymarkedtrails.org, tile-cyclosm.openstreetmap.fr, tiles.opensnowmap.org,
@@ -314,7 +339,10 @@
         <article lang="pl" data-language="pl" hidden>
             <a class="back-link" href="./">← Powrót do mapy</a>
             <header class="page-header">
-                <h1>O mapie, licencje i warunki użycia</h1>
+                <div class="brand">
+                    <img src="assets/favicon.svg" alt="Logo Open 3D Terrain Map" />
+                    <h1>O mapie, licencje i warunki użycia</h1>
+                </div>
                 <button type="button" id="language-switch-pl" class="language-switch" data-target="en">English</button>
             </header>
             <p class="updated">Ostatnia aktualizacja: 18 października 2026</p>
@@ -349,12 +377,17 @@
             </div>
 
             <h2>Prywatność</h2>
-            <p>Sama aplikacja nie używa cookies ani analityki i nie ma własnego serwera. Żeby jednak pokazać mapę, twoja
-                przeglądarka łączy się bezpośrednio z usługami wymienionymi poniżej; każda z nich otrzymuje twój adres IP i
+            <p>Sama aplikacja nie używa cookies i nie ma własnego serwera. Żeby wiedzieć mniej więcej, ile osób z niej
+                korzysta, liczy odwiedziny za pomocą <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web
+                    Analytics</a>, które nie używa cookies ani odcisków przeglądarki i nie śledzi cię między stronami;
+                Cloudflare otrzymuje adres strony, stronę, z której przyszedłeś, typ przeglądarki i urządzenia oraz kraj
+                ustalony na podstawie adresu IP. Żeby pokazać mapę, twoja przeglądarka łączy się bezpośrednio z usługami
+                wymienionymi poniżej; każda z nich otrzymuje twój adres IP i
                 wie, jaki obszar mapy oglądasz. Treść wyszukiwania trafia do OpenStreetMap Nominatim. Lokalizacja z
                 przycisku „pokaż moją lokalizację” jest używana tylko w twojej przeglądarce do wycentrowania mapy i nie
                 jest nigdzie wysyłana przez aplikację.</p>
-            <p class="muted">Odpytywane serwery: open3dterrainmap.org (hosting GitHub Pages), unpkg.com, fonts.googleapis.com,
+            <p class="muted">Odpytywane serwery: open3dterrainmap.org (hosting GitHub Pages), static.cloudflareinsights.com i cloudflareinsights.com
+                (Cloudflare Web Analytics), unpkg.com, fonts.googleapis.com,
                 fonts.gstatic.com, demotiles.maplibre.org, tiles.mapterhorn.com, tiles.openfreemap.org,
                 tile.openstreetmap.org, nominatim.openstreetmap.org, server.arcgisonline.com, tile.opentopomap.org,
                 tiles.openrailwaymap.org, tile.waymarkedtrails.org, tile-cyclosm.openstreetmap.fr, tiles.opensnowmap.org,
@@ -514,6 +547,8 @@
 
         showLanguage(detectLanguage());
     </script>
+    <!-- Cloudflare Web Analytics: cookieless visit counts (see "Privacy" on about.html). -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "8f7ce4dfdf664256aeab2683aaccb291"}'></script>
 </body>
 
 </html>
