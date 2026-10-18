@@ -2,6 +2,8 @@
 
 Pełnoekranowa mapa 3D w jednym pliku `index.html` (MapLibre GL JS + dane wysokości [Mapterhorn](https://mapterhorn.com)). Interfejs po angielsku, po polsku dla przeglądarek z polskim językiem; przełącznik EN/PL w panelu.
 
+**Na żywo:** https://kosteck.github.io/open-3d-terrain-map/
+
 - **Mapa bazowa:** OpenStreetMap, zdjęcia lotnicze (Esri World Imagery), OpenTopoMap, brak.
 - **Nakładki (dowolnie wiele):** drogi, koleje (4 style OpenRailwayMap: infrastruktura, prędkości, sygnalizacja, elektryfikacja), szlaki piesze, oznakowane szlaki rowerowe, drogi i ścieżki rowerowe (CyclOSM), MTB, trasy narciarskie, znaki nawigacyjne (OpenSeaMap), nazwy miejscowości i granice.
 - **Teren i 3D:** teren 3D (włącz/wyłącz), cieniowanie, poziomice (suwak gęstości 1–5; najgęstszy przy zoomie 16+ = co 1 m), budynki 3D z OpenFreeMap (od zoomu 14; wysokości z OSM, budynki bez podanej wysokości są niskie).
@@ -22,7 +24,7 @@ i otworzyć http://localhost:8765. Otwarcie pliku bezpośrednio (`file://`) nie 
 
 ## Publikacja
 
-Wystarczy dowolny hosting plików statycznych, np. GitHub Pages (Settings → Pages → branch `main`, folder `/`).
+Strona jest publikowana przez GitHub Pages z gałęzi `main` (folder `/`); każdy push na `main` aktualizuje ją po ~1 min.
 
 ## Źródła danych i licencje
 
@@ -49,3 +51,7 @@ Atrybucje wyświetlają się w prawym dolnym rogu mapy (tylko dla włączonych w
 ## Post-MVP
 
 - Suwak przezroczystości dla nakładek.
+
+## Licencja
+
+Kod: [MIT](LICENSE). Dane i kafelki map podlegają licencjom ich dostawców (sekcja „Źródła danych i licencje”).
