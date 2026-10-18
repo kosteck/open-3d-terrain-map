@@ -20,21 +20,25 @@ It is a full-screen 3D map in a single `index.html` file (MapLibre GL JS + [Mapt
 - **Navigation:** pan, zoom, rotate and tilt (right mouse button / Ctrl + drag / touch gestures).
 - **Shareable view:** camera and layers are kept in the URL, e.g. `#map=13/47.27/11.39/0/60&base=osm&overlays=rail,hiking&terrain=terrain3d,hillshade,contours&density=3&rail=standard&lang=pl` (`lang` only after switching the language manually).
 
-## Running locally
+## Using it
 
-The page needs an internet connection (libraries from unpkg, icons from Google Fonts, tiles from the map servers). Serve it over HTTP:
+Just open https://open3dterrainmap.org in a browser – there is nothing to install. On a phone you can also add it to the home screen (“Install app” / “Add to Home Screen”).
+
+## Running your own copy (optional)
+
+Only needed if you want to change the code. The page still loads libraries, icons and map tiles from the internet, and it has to be served over HTTP:
 
 ```bash
 npx --yes http-server -p 8765 -c-1
 ```
 
-and open http://localhost:8765.
+Then open http://localhost:8765.
 
 Opening `index.html` directly from disk (`file://`) does **not** work: the browser sends no Referer header, so the OpenStreetMap tile servers answer with “Access blocked” (HTTP 403) tiles.
 
 ## Deployment
 
-The site is published with GitHub Pages from the `main` branch (folder `/`) under the custom domain https://open3dterrainmap.org (set by the `CNAME` file); every push to `main` updates it within about a minute. The old address https://kosteck.github.io/open-3d-terrain-map/ redirects there.
+Published with GitHub Pages from the `main` branch under the custom domain set in `CNAME`.
 
 ## Data sources and licences
 
@@ -54,7 +58,7 @@ The full list of providers, licences, disclaimers and privacy notes is on the [a
 
 ## Known limitations
 
-- Mapterhorn has data up to zoom 16 (~1 m per pixel) only in parts of the world (e.g. Poland, the Alps) and up to zoom 12 elsewhere. There, contour lines disappear above about zoom 14 and the browser console shows 404 tile errors.
+- High-resolution elevation data (up to ~1 m per pixel) exists only in some regions – see the [Mapterhorn coverage map](https://mapterhorn.com/coverage/). Elsewhere the data is coarser: contour lines disappear above about zoom 14 and the browser console shows 404 tile errors.
 - Switching the language reloads the page (the view and layers are kept in the URL).
 
 ## Licence
