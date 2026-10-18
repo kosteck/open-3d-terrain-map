@@ -1,59 +1,60 @@
 # Open 3D Terrain Map
 
-Pełnoekranowa mapa 3D w jednym pliku `index.html` (MapLibre GL JS + dane wysokości [Mapterhorn](https://mapterhorn.com)). Interfejs po angielsku, po polsku dla przeglądarek z polskim językiem; przełącznik EN/PL w panelu.
+I kept coming across great open maps – [Mapterhorn](https://mapterhorn.com), [OpenRailwayMap](https://www.openrailwaymap.org), [OpenTopoMap](https://opentopomap.org), [CyclOSM](https://www.cyclosm.org) and many more – but I couldn't find a single place that had them all at hand. So I made one for myself.
 
-**Na żywo:** https://kosteck.github.io/open-3d-terrain-map/ · **Licencje i warunki użycia:** [about.html](https://kosteck.github.io/open-3d-terrain-map/about.html)
+It is a full-screen 3D map in a single `index.html` file (MapLibre GL JS + [Mapterhorn](https://mapterhorn.com) elevation data). The interface is in English, or in Polish for browsers set to Polish; there is an EN/PL switch in the panel.
 
-> Projekt hobbystyczny, tylko do osobistego, niekomercyjnego użytku. Nie do nawigacji ani decyzji związanych z bezpieczeństwem.
+**Live:** https://kosteck.github.io/open-3d-terrain-map/ · **Licences and terms of use:** [about.html](https://kosteck.github.io/open-3d-terrain-map/about.html)
 
-- **Mapa bazowa:** OpenStreetMap, zdjęcia lotnicze (Esri World Imagery), OpenTopoMap, brak.
-- **Nakładki (dowolnie wiele):** drogi, koleje (4 style OpenRailwayMap: infrastruktura, prędkości, sygnalizacja, elektryfikacja), szlaki piesze, oznakowane szlaki rowerowe, drogi i ścieżki rowerowe (CyclOSM), MTB, trasy narciarskie, znaki nawigacyjne (OpenSeaMap), nazwy miejscowości i granice.
-- **Teren i 3D:** teren 3D (włącz/wyłącz), cieniowanie, poziomice (suwak gęstości 1–5; najgęstszy przy zoomie 16+ = co 1 m), budynki 3D z OpenFreeMap (od zoomu 14; wysokości z OSM, budynki bez podanej wysokości są niskie).
-- **Domyślnie:** OpenStreetMap, bez nakładek, teren 3D + cieniowanie.
-- **Wyszukiwarka (OpenStreetMap Nominatim):** miejscowości, regiony, kraje, szczyty, jeziora, ulice, obiekty; także współrzędne `47.27, 11.39`. Szuka po Enterze (zasady Nominatim: max 1 zapytanie/s, bez podpowiedzi w trakcie pisania).
-- **Nawigacja:** przesuwanie, zoom, obrót i pochylenie (prawy przycisk myszy / Ctrl + przeciąganie / gesty).
-- **Link do widoku:** kamera i warstwy w adresie, np. `#map=13/47.27/11.39/0/60&base=osm&overlays=rail,hiking&terrain=hillshade,contours&density=3&rail=standard&lang=pl` (`lang` tylko po ręcznym przełączeniu języka).
+> Hobby project for personal, non-commercial use only. Not for navigation or safety-critical decisions.
 
-## Uruchomienie lokalne
+## Features
 
-Strona potrzebuje internetu (biblioteki z unpkg, ikony z Google Fonts, kafelki z serwerów map). Najlepiej serwować ją przez HTTP:
+- **Base map:** OpenStreetMap, aerial imagery (Esri World Imagery), OpenTopoMap, none.
+- **Overlays (any combination):** roads, cycle lanes and paths (CyclOSM), railways (4 OpenRailwayMap styles: infrastructure, max speed, signalling, electrification), hiking trails, signposted cycling routes, mountain bike trails, ski pistes, sea marks (OpenSeaMap), place names and borders.
+- **Terrain & 3D:** 3D terrain on/off, hillshade, contour lines (density slider 1–5; the densest setting at zoom 16+ gives 1 m intervals), 3D buildings from OpenFreeMap (from zoom 14; heights from OpenStreetMap, buildings without a height are drawn low).
+- **Defaults:** OpenStreetMap, no overlays, 3D terrain + hillshade.
+- **Search (OpenStreetMap Nominatim):** towns, regions, countries, peaks, lakes, streets and other places; also coordinates such as `47.27, 11.39`. Search runs on Enter (Nominatim policy: max 1 request per second, no search-as-you-type).
+- **Navigation:** pan, zoom, rotate and tilt (right mouse button / Ctrl + drag / touch gestures).
+- **Shareable view:** camera and layers are kept in the URL, e.g. `#map=13/47.27/11.39/0/60&base=osm&overlays=rail,hiking&terrain=terrain3d,hillshade,contours&density=3&rail=standard&lang=pl` (`lang` only after switching the language manually).
+
+## Running locally
+
+The page needs an internet connection (libraries from unpkg, icons from Google Fonts, tiles from the map servers). Serve it over HTTP:
 
 ```bash
 npx --yes http-server -p 8765 -c-1
 ```
 
-i otworzyć http://localhost:8765. Otwarcie pliku bezpośrednio (`file://`) nie było testowane; serwery kafelków OSM mogą odrzucać żądania bez nagłówka Referer.
+and open http://localhost:8765.
 
-## Publikacja
+Opening `index.html` directly from disk (`file://`) does **not** work: the browser sends no Referer header, so the OpenStreetMap tile servers answer with “Access blocked” (HTTP 403) tiles.
 
-Strona jest publikowana przez GitHub Pages z gałęzi `main` (folder `/`); każdy push na `main` aktualizuje ją po ~1 min.
+## Deployment
 
-## Źródła danych i licencje
+The site is published with GitHub Pages from the `main` branch (folder `/`) at https://kosteck.github.io/open-3d-terrain-map/; every push to `main` updates it within about a minute.
 
-Pełna lista dostawców, licencji, zastrzeżeń i informacji o prywatności: [about.html](about.html). Atrybucje wyświetlają się w prawym dolnym rogu mapy (tylko dla włączonych warstw). Warunki dostawców:
+## Data sources and licences
 
-- Mapterhorn (wysokości): https://mapterhorn.com/attribution
-- OpenStreetMap kafelki: https://operations.osmfoundation.org/policies/tiles/
-- Nominatim (wyszukiwarka): https://operations.osmfoundation.org/policies/nominatim/
-- OpenTopoMap (CC-BY-SA): https://opentopomap.org/about
-- OpenRailwayMap (CC-BY-SA): https://www.openrailwaymap.org/
-- Waymarked Trails (CC-BY-SA): https://waymarkedtrails.org
-- CyclOSM (CC-BY-SA): https://www.cyclosm.org
-- OpenSnowMap (CC-BY-SA): https://www.opensnowmap.org
-- OpenSeaMap: https://www.openseamap.org
-- OpenFreeMap / OpenMapTiles (budynki 3D): https://openfreemap.org
-- Esri World Imagery i warstwy Reference: warunki Esri; nie do zastosowań komercyjnych bez licencji.
+The full list of providers, licences, disclaimers and privacy notes is on the [about page](https://kosteck.github.io/open-3d-terrain-map/about.html). Attributions are shown in the bottom-right corner of the map (only for layers that are switched on). Providers' terms:
 
-## Znane ograniczenia
+- Mapterhorn (elevation): https://mapterhorn.com/attribution
+- OpenStreetMap tiles: https://operations.osmfoundation.org/policies/tiles/
+- Nominatim (search): https://operations.osmfoundation.org/policies/nominatim/
+- OpenTopoMap (CC BY-SA): https://opentopomap.org/about
+- OpenRailwayMap (CC BY-SA 2.0): https://wiki.openstreetmap.org/wiki/OpenRailwayMap/API
+- CyclOSM (CC BY-SA 2.0): https://www.cyclosm.org
+- Waymarked Trails: https://waymarkedtrails.org
+- OpenSnowMap: https://www.opensnowmap.org
+- OpenSeaMap (CC BY-SA 2.0): https://www.openseamap.org
+- OpenFreeMap / OpenMapTiles (3D buildings): https://openfreemap.org
+- Esri World Imagery and reference layers: Esri terms; not for commercial use without a licence.
 
-- Mapterhorn ma dane do zoomu 16 (~1 m/piksel) tylko w części świata (m.in. Polska, Alpy); gdzie indziej do zoomu 12. Tam poziomice znikają powyżej ok. zoomu 14, a w konsoli widać błędy 404 kafelków.
-- Zmiana języka przeładowuje stronę (stan zostaje w adresie).
-- Tooltipy przycisków pokazują się po najechaniu myszą lub fokusie klawiatury; na ekranach dotykowych ich nie ma.
+## Known limitations
 
-## Post-MVP
+- Mapterhorn has data up to zoom 16 (~1 m per pixel) only in parts of the world (e.g. Poland, the Alps) and up to zoom 12 elsewhere. There, contour lines disappear above about zoom 14 and the browser console shows 404 tile errors.
+- Switching the language reloads the page (the view and layers are kept in the URL).
 
-- Suwak przezroczystości dla nakładek.
+## Licence
 
-## Licencja
-
-Kod: [MIT](LICENSE). Dane i kafelki map podlegają licencjom ich dostawców (sekcja „Źródła danych i licencje”).
+Code: [MIT](LICENSE). Map data and tiles are subject to their providers' licences (see “Data sources and licences”).

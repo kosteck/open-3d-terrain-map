@@ -112,6 +112,29 @@
             user-select: none;
         }
 
+        /* Collapsed search (narrow screens): search card hidden, its button floats in the "Layers" row. */
+        #search-open-button {
+            display: none;
+            float: right;
+            width: 30px;
+            height: 30px;
+            margin: -5px -6px 0 8px;
+        }
+
+        #side-panel.search-collapsed #search-card {
+            display: none;
+        }
+
+        #side-panel.search-collapsed #search-open-button {
+            display: inline-flex;
+        }
+
+        /* Its tooltip would run off the right edge of a narrow screen. */
+        #search-open-button::after {
+            left: auto !important;
+            right: 0;
+        }
+
         #layer-panel .panel-body {
             padding: 0 12px 10px;
         }
@@ -205,7 +228,8 @@
 
         /* Tooltip from aria-label, so the visible hint and the accessible name never drift apart. */
         .icon-button[aria-label]:hover::after,
-        .icon-button[aria-label]:focus-visible::after {
+        .icon-button[aria-label]:focus-visible::after,
+        .icon-button.tap-tooltip[aria-label]::after {
             content: attr(aria-label);
             position: absolute;
             top: calc(100% + 6px);
@@ -222,10 +246,15 @@
             pointer-events: none;
         }
 
-        /* Touch screens have no hover; a tooltip stuck after a tap would only cover the map. */
+        /* Touch screens have no hover: a tooltip stuck after a tap would only cover the map,
+           so there the tooltip shows briefly after a tap instead (.tap-tooltip, set from JS). */
         @media (hover: none) {
             .icon-button[aria-label]:hover::after {
                 content: none;
+            }
+
+            .icon-button.tap-tooltip[aria-label]::after {
+                content: attr(aria-label);
             }
         }
 
@@ -297,7 +326,7 @@
     <div id="map"></div>
 
     <div id="side-panel">
-        <div class="panel-card">
+        <div class="panel-card" id="search-card">
             <form id="search-form" role="search">
                 <input id="search-input" type="search" autocomplete="off" spellcheck="false">
                 <button type="submit" class="icon-button" id="search-button">
@@ -308,7 +337,13 @@
         </div>
 
         <details id="layer-panel" class="panel-card" open>
-            <summary data-i18n="panelTitle"></summary>
+            <summary>
+                <span data-i18n="panelTitle"></span>
+                <!-- Narrow screens only: the search card collapses into this button (see setSearchCollapsed). -->
+                <button type="button" class="icon-button" id="search-open-button">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                </button>
+            </summary>
             <div class="panel-body">
                 <fieldset>
                     <legend data-i18n="sectionBase"></legend>
@@ -384,7 +419,8 @@
                 contourBelowMinZoom: 'Contour lines appear from zoom 10',
                 navigationHint: 'Rotate / tilt: right mouse button or Ctrl + drag.',
                 searchPlaceholder: 'Search place, region, country…',
-                searchButton: 'Search (OpenStreetMap Nominatim)',
+                searchButton: 'Search (OpenStreetMap Nominatim) – shortcut: /',
+                searchOpen: 'Search places',
                 searchNoResults: 'Nothing found',
                 searchFailed: 'Search failed, please try again',
                 searchCoordinates: 'Coordinates',
@@ -427,7 +463,8 @@
                 contourBelowMinZoom: 'Poziomice widoczne od zoomu 10',
                 navigationHint: 'Obrót / pochylenie: prawy przycisk myszy lub Ctrl + przeciąganie.',
                 searchPlaceholder: 'Szukaj miejscowości, regionu, kraju…',
-                searchButton: 'Szukaj (OpenStreetMap Nominatim)',
+                searchButton: 'Szukaj (OpenStreetMap Nominatim) – skrót: /',
+                searchOpen: 'Szukaj miejsc',
                 searchNoResults: 'Nic nie znaleziono',
                 searchFailed: 'Wyszukiwanie nie powiodło się, spróbuj ponownie',
                 searchCoordinates: 'Współrzędne',
@@ -943,6 +980,7 @@
             searchInput.placeholder = t.searchPlaceholder;
             searchInput.setAttribute('aria-label', t.searchPlaceholder);
             document.getElementById('search-button').setAttribute('aria-label', t.searchButton);
+            document.getElementById('search-open-button').setAttribute('aria-label', t.searchOpen);
 
             const languageToggle = document.getElementById('language-toggle');
             languageToggle.setAttribute('aria-label', t.languageToggleTooltip);
@@ -1141,6 +1179,19 @@
 
         // --- Wiring ---
 
+        // On touch screens, briefly show what a tapped button does (there is no hover to reveal the tooltip).
+        const TAP_TOOLTIP_DURATION_MS = 1500;
+        const touchScreenQuery = window.matchMedia('(hover: none)');
+        let tapTooltipTimer = null;
+        document.getElementById('side-panel').addEventListener('click', (event) => {
+            const button = event.target.closest('.icon-button');
+            if (!button || !touchScreenQuery.matches) return;
+            document.querySelectorAll('.icon-button.tap-tooltip').forEach((other) => other.classList.remove('tap-tooltip'));
+            clearTimeout(tapTooltipTimer);
+            button.classList.add('tap-tooltip');
+            tapTooltipTimer = setTimeout(() => button.classList.remove('tap-tooltip'), TAP_TOOLTIP_DURATION_MS);
+        });
+
         renderPanel();
         syncPanelToState();
 
@@ -1172,7 +1223,56 @@
             if (event.key === 'Escape') {
                 event.target.value = '';
                 clearSearch();
+                event.target.blur();
+                collapseSearchIfIdle();
             }
+        });
+
+        // --- Collapsible search on narrow screens ---
+        // Phones collapse the idle search card into a button in the "Layers" row; it stays open while it holds
+        // text or results. Wide screens always show it (discoverability beats ~45 px of space there).
+
+        const narrowScreenQuery = window.matchMedia('(max-width: 600px)');
+
+        function setSearchCollapsed(collapsed) {
+            document.getElementById('side-panel').classList.toggle('search-collapsed', collapsed && narrowScreenQuery.matches);
+        }
+
+        function isSearchInUse() {
+            return document.getElementById('search-input').value.trim() !== ''
+                || document.getElementById('search-results').children.length > 0;
+        }
+
+        function collapseSearchIfIdle() {
+            if (narrowScreenQuery.matches && !isSearchInUse()) setSearchCollapsed(true);
+        }
+
+        function openSearch() {
+            setSearchCollapsed(false);
+            document.getElementById('search-input').focus();
+        }
+
+        document.getElementById('search-open-button').addEventListener('click', (event) => {
+            event.preventDefault(); // the button sits inside <summary>; don't toggle the layer panel
+            openSearch();
+        });
+        document.getElementById('search-input').addEventListener('blur', collapseSearchIfIdle);
+        map.on('click', collapseSearchIfIdle);
+        narrowScreenQuery.addEventListener('change', () => {
+            if (narrowScreenQuery.matches) {
+                collapseSearchIfIdle();
+            } else {
+                setSearchCollapsed(false);
+            }
+        });
+        collapseSearchIfIdle();
+
+        // "/" jumps to the search box (as on GitHub or YouTube), unless the user is already typing somewhere.
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) return;
+            if (event.target.closest('input, textarea, select, [contenteditable]')) return;
+            event.preventDefault();
+            openSearch();
         });
     </script>
 </body>
