@@ -4,7 +4,8 @@ Pełnoekranowa mapa 3D w jednym pliku `index.html` (MapLibre GL JS + dane wysoko
 
 - **Mapa bazowa:** OpenStreetMap, zdjęcia lotnicze (Esri World Imagery), OpenTopoMap, brak.
 - **Nakładki (dowolnie wiele):** drogi, koleje (4 style OpenRailwayMap: infrastruktura, prędkości, sygnalizacja, elektryfikacja), szlaki piesze, rowerowe, MTB, trasy narciarskie, znaki nawigacyjne (OpenSeaMap), nazwy miejscowości i granice.
-- **Teren:** cieniowanie i/lub poziomice; suwak gęstości poziomic 1–5 (najgęstszy przy zoomie 16+ = co 1 m).
+- **Teren i 3D:** cieniowanie, poziomice (suwak gęstości 1–5; najgęstszy przy zoomie 16+ = co 1 m), budynki 3D z OpenFreeMap (od zoomu 14; wysokości z OSM, budynki bez podanej wysokości są niskie).
+- **Domyślnie:** OpenStreetMap, bez nakładek, samo cieniowanie.
 - **Wyszukiwarka (OpenStreetMap Nominatim):** miejscowości, regiony, kraje, szczyty, jeziora, ulice, obiekty; także współrzędne `47.27, 11.39`. Szuka po Enterze (zasady Nominatim: max 1 zapytanie/s, bez podpowiedzi w trakcie pisania).
 - **Nawigacja:** przesuwanie, zoom, obrót i pochylenie (prawy przycisk myszy / Ctrl + przeciąganie / gesty), przełącznik 3D.
 - **Link do widoku:** kamera i warstwy w adresie, np. `#map=13/47.27/11.39/0/60&base=osm&overlays=rail,hiking&terrain=hillshade,contours&density=3&rail=standard&lang=pl` (`lang` tylko po ręcznym przełączeniu języka).
@@ -35,6 +36,7 @@ Atrybucje wyświetlają się w prawym dolnym rogu mapy (tylko dla włączonych w
 - Waymarked Trails (CC-BY-SA): https://waymarkedtrails.org
 - OpenSnowMap (CC-BY-SA): https://www.opensnowmap.org
 - OpenSeaMap: https://www.openseamap.org
+- OpenFreeMap / OpenMapTiles (budynki 3D): https://openfreemap.org
 - Esri World Imagery i warstwy Reference: warunki Esri; nie do zastosowań komercyjnych bez licencji.
 
 ## Znane ograniczenia

@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/maplibre-contour@0.0.5/dist/index.min.js"></script>
     <!-- Icon subset: icon_names must stay alphabetically sorted or Google Fonts rejects the request. -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=add_road,anchor,block,close,contrast,directions_bike,downhill_skiing,hiking,label,line_curve,map,pedal_bike,satellite_alt,search,terrain,train,translate&display=block" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=add_road,anchor,block,close,contrast,directions_bike,domain,downhill_skiing,hiking,label,line_curve,map,pedal_bike,satellite_alt,search,terrain,train,translate&display=block" />
     <style>
         html,
         body {
@@ -317,7 +317,7 @@
                 panelTitle: 'Layers',
                 sectionBase: 'Base map',
                 sectionOverlays: 'Overlays',
-                sectionTerrain: 'Terrain',
+                sectionTerrain: 'Terrain & 3D',
                 'base.osm': 'OpenStreetMap',
                 'base.aerial': 'Aerial imagery (Esri)',
                 'base.opentopomap': 'OpenTopoMap (topographic)',
@@ -337,6 +337,7 @@
                 'railStyle.electrification': 'Railways: electrification',
                 'terrain.hillshade': 'Hillshade',
                 'terrain.contours': 'Contour lines',
+                'terrain.buildings': '3D buildings (OpenFreeMap, from zoom 14)',
                 densityLabel: 'Contour density',
                 sparser: 'sparser',
                 denser: 'denser',
@@ -355,7 +356,7 @@
                 panelTitle: 'Warstwy',
                 sectionBase: 'Mapa bazowa',
                 sectionOverlays: 'Nakładki',
-                sectionTerrain: 'Ukształtowanie terenu',
+                sectionTerrain: 'Teren i 3D',
                 'base.osm': 'OpenStreetMap',
                 'base.aerial': 'Zdjęcia lotnicze (Esri)',
                 'base.opentopomap': 'OpenTopoMap (topograficzna)',
@@ -375,6 +376,7 @@
                 'railStyle.electrification': 'Koleje: elektryfikacja',
                 'terrain.hillshade': 'Cieniowanie',
                 'terrain.contours': 'Poziomice',
+                'terrain.buildings': 'Budynki 3D (OpenFreeMap, od zoomu 14)',
                 densityLabel: 'Gęstość poziomic',
                 sparser: 'rzadziej',
                 denser: 'gęściej',
@@ -529,11 +531,17 @@
         ];
         const OVERLAY_IDS = OVERLAYS.map((overlay) => overlay.id);
 
+        // mapLayerIds: style layers each toggle shows/hides.
         const TERRAIN_LAYERS = [
-            { id: 'hillshade', icon: 'contrast' },
-            { id: 'contours', icon: 'line_curve' }
+            { id: 'hillshade', icon: 'contrast', mapLayerIds: ['hillshade'] },
+            { id: 'contours', icon: 'line_curve', mapLayerIds: ['contour-lines', 'contour-labels'] },
+            { id: 'buildings', icon: 'domain', mapLayerIds: ['buildings-3d'] }
         ];
         const TERRAIN_LAYER_IDS = TERRAIN_LAYERS.map((terrainLayer) => terrainLayer.id);
+        const DEFAULT_TERRAIN_LAYER_IDS = ['hillshade'];
+
+        // OpenFreeMap: free OpenMapTiles-schema vector tiles (no key); its 'building' layer carries extrusion heights.
+        const BUILDINGS_MINZOOM = 14;
 
         // --- Contour density ---
         // Intervals follow a 1-2-5 ladder; a contour step's major (labelled) line is two rungs up (1->5, 20->100).
@@ -587,7 +595,7 @@
             return {
                 base: BASE_MAP_IDS.includes(base) ? base : 'osm',
                 overlays: parseListParam(params, 'overlays', OVERLAY_IDS, []),
-                terrain: parseListParam(params, 'terrain', TERRAIN_LAYER_IDS, TERRAIN_LAYER_IDS),
+                terrain: parseListParam(params, 'terrain', TERRAIN_LAYER_IDS, DEFAULT_TERRAIN_LAYER_IDS),
                 density: Number.isInteger(density) && density >= CONTOUR_DENSITY_MIN && density <= CONTOUR_DENSITY_MAX
                     ? density
                     : CONTOUR_DENSITY_DEFAULT,
@@ -666,6 +674,10 @@
                     type: 'raster-dem',
                     url: 'https://tiles.mapterhorn.com/tilejson.json'
                 },
+                openFreeMapSource: {
+                    type: 'vector',
+                    url: 'https://tiles.openfreemap.org/planet'
+                },
                 contourSource: {
                     type: 'vector',
                     tiles: [contourTileUrlForDensity(appState.density)],
@@ -701,6 +713,7 @@
 
             const showHillshade = appState.terrain.has('hillshade');
             const showContours = appState.terrain.has('contours');
+            const showBuildings = appState.terrain.has('buildings');
 
             return {
                 version: 8,
@@ -749,6 +762,31 @@
                             'text-color': 'rgb(150, 100, 35)',
                             'text-halo-color': 'white',
                             'text-halo-width': 1.5
+                        }
+                    },
+                    {
+                        id: 'buildings-3d',
+                        type: 'fill-extrusion',
+                        source: 'openFreeMapSource',
+                        'source-layer': 'building',
+                        minzoom: BUILDINGS_MINZOOM,
+                        filter: ['!=', ['get', 'hide_3d'], true],
+                        layout: visibility(showBuildings),
+                        paint: {
+                            // One neutral colour: OSM building:colour tags are sparse and often garish (pure red/black blocks).
+                            'fill-extrusion-color': '#d8cfc4',
+                            // Grow buildings out of the ground over one zoom level instead of popping in.
+                            'fill-extrusion-height': [
+                                'interpolate', ['linear'], ['zoom'],
+                                BUILDINGS_MINZOOM, 0,
+                                BUILDINGS_MINZOOM + 1, ['get', 'render_height']
+                            ],
+                            'fill-extrusion-base': [
+                                'interpolate', ['linear'], ['zoom'],
+                                BUILDINGS_MINZOOM, 0,
+                                BUILDINGS_MINZOOM + 1, ['get', 'render_min_height']
+                            ],
+                            'fill-extrusion-opacity': 0.9
                         }
                     },
                     ...overlayLayers(true)
@@ -905,8 +943,8 @@
             } else {
                 appState.terrain.add(terrainLayerId);
             }
-            const layerIds = terrainLayerId === 'hillshade' ? ['hillshade'] : ['contour-lines', 'contour-labels'];
-            for (const layerId of layerIds) {
+            const terrainLayer = TERRAIN_LAYERS.find((candidate) => candidate.id === terrainLayerId);
+            for (const layerId of terrainLayer.mapLayerIds) {
                 map.setLayoutProperty(layerId, 'visibility', visibility(appState.terrain.has(terrainLayerId)).visibility);
             }
             afterStateChange();
