@@ -5,10 +5,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Open 3D Terrain Map</title>
-    <!-- Versions pinned to the pair used by the Mapterhorn examples (hillshade-method 'igor' needs maplibre-gl >= 5.5). -->
-    <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
-    <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
-    <script src="https://unpkg.com/maplibre-contour@0.0.5/dist/index.min.js"></script>
+    <!-- Library versions: see "Dependencies" in CLAUDE.md before changing. maplibre-gl 6.x ships only as an ES module,
+         imported at the top of the app script below; maplibre-contour is still a UMD global (mlcontour). -->
+    <link href="https://unpkg.com/maplibre-gl@6.12.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-contour@0.1.1/dist/index.min.js"></script>
     <!-- Icon subset: icon_names must stay alphabetically sorted or Google Fonts rejects the request. -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=add_road,anchor,block,close,contrast,directions_bike,domain,downhill_skiing,hiking,info,label,landscape,line_curve,map,satellite_alt,search,signpost,terrain,train,translate&display=block" />
@@ -395,7 +395,9 @@
         </details>
     </div>
 
-    <script type="text/javascript">
+    <script type="module">
+        import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.12.0/dist/maplibre-gl.mjs';
+
         // --- Translations (EN default; PL when the browser's preferred language is Polish) ---
 
         const TRANSLATIONS = {
@@ -908,6 +910,8 @@
                     ...overlayLayers(true)
                 ],
                 ...(appState.terrain.has('terrain3d') ? { terrain: TERRAIN_3D_SPECIFICATION } : {}),
+                // Globe when zoomed out; MapLibre switches to flat Mercator by itself when zooming in.
+                projection: { type: 'globe' },
                 sky: {}
             };
         }
