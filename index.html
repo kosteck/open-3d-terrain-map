@@ -409,10 +409,6 @@
             color: #666;
         }
 
-        #layer-panel fieldset:disabled {
-            opacity: 0.45;
-        }
-
         #layer-panel .hint {
             font-size: 12px;
             color: #666;
@@ -497,7 +493,7 @@
                     <div id="contour-interval-info" class="hint"></div>
                 </fieldset>
                 <div class="panel-footer">
-                    <p class="hint" data-i18n="navigationHint"></p>
+                    <p class="hint" id="navigation-hint" data-i18n="navigationHint"></p>
                     <div class="footer-buttons">
                         <a class="icon-button" id="about-link" target="_blank" rel="noopener">
                             <span class="material-symbols-outlined" aria-hidden="true">info</span>
@@ -553,6 +549,7 @@
                 webglUnsupportedTitle: 'The map can’t start in this browser',
                 webglUnsupported: 'It needs WebGL 2 graphics, which this browser or device doesn’t provide, or hardware acceleration is switched off. Try an up-to-date Chrome, Firefox, Edge or Safari, or turn on hardware acceleration in the browser settings.',
                 navigationHint: 'Rotate / tilt: right mouse button or Ctrl + drag.',
+                navigationHintTouch: 'Rotate / tilt: twist or drag up/down with two fingers.',
                 searchPlaceholder: 'Search place, region, country…',
                 searchButton: 'Search (OpenStreetMap Nominatim) – shortcut: /',
                 searchOpen: 'Search places',
@@ -600,6 +597,7 @@
                 webglUnsupportedTitle: 'Mapa nie może się uruchomić w tej przeglądarce',
                 webglUnsupported: 'Potrzebuje grafiki WebGL 2, której ta przeglądarka lub urządzenie nie obsługuje, albo wyłączone jest przyspieszenie sprzętowe. Spróbuj aktualnej wersji Chrome, Firefoksa, Edge lub Safari albo włącz przyspieszenie sprzętowe w ustawieniach przeglądarki.',
                 navigationHint: 'Obrót / pochylenie: prawy przycisk myszy lub Ctrl + przeciąganie.',
+                navigationHintTouch: 'Obrót / pochylenie: obróć lub przesuń w górę/dół dwoma palcami.',
                 searchPlaceholder: 'Szukaj miejscowości, regionu, kraju…',
                 searchButton: 'Szukaj (OpenStreetMap Nominatim) – skrót: /',
                 searchOpen: 'Szukaj miejsc',
@@ -1172,6 +1170,10 @@
 
         function renderPanel() {
             document.documentElement.lang = appState.lang;
+            // Touch screens have no mouse: describe the two-finger gestures instead.
+            if (window.matchMedia('(hover: none)').matches) {
+                document.getElementById('navigation-hint').dataset.i18n = 'navigationHintTouch';
+            }
             document.querySelectorAll('[data-i18n]').forEach((element) => {
                 element.textContent = t[element.dataset.i18n];
             });
@@ -1232,7 +1234,8 @@
             railStyleSelect.value = appState.railStyle;
 
             document.getElementById('contour-density').value = appState.density;
-            document.getElementById('contour-density-fieldset').disabled = !appState.terrain.has('contours');
+            // The density slider only matters with contours on; hidden otherwise to keep the panel short on phones.
+            document.getElementById('contour-density-fieldset').hidden = !appState.terrain.has('contours');
             updateContourIntervalInfo();
         }
 
@@ -1515,6 +1518,16 @@
             }
         });
         collapseSearchIfIdle();
+
+        // On narrow screens the open layer panel covers most of the map: any user gesture on the map collapses it
+        // (originalEvent is set only for user input, not for search fly-to or other programmatic moves).
+        for (const mapGestureEvent of ['click', 'dragstart', 'zoomstart', 'rotatestart', 'pitchstart']) {
+            map.on(mapGestureEvent, (event) => {
+                if (event.originalEvent && narrowScreenQuery.matches) {
+                    document.getElementById('layer-panel').open = false;
+                }
+            });
+        }
 
         // "/" jumps to the search box (as on GitHub or YouTube), unless the user is already typing somewhere.
         document.addEventListener('keydown', (event) => {
