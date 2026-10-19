@@ -29,7 +29,7 @@
     <script src="https://unpkg.com/maplibre-contour@0.1.1/dist/index.min.js"></script>
     <!-- Icon subset: icon_names must stay alphabetically sorted or Google Fonts rejects the request. -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=add_road,anchor,block,close,contrast,directions_bike,domain,downhill_skiing,hiking,info,label,landscape,line_curve,map,satellite_alt,search,signpost,terrain,train,translate&display=block" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0..1,0&icon_names=anchor,block,close,contrast,directions_bike,domain,downhill_skiing,hiking,info,label,landscape,line_curve,map,road,satellite_alt,search,signpost,terrain,train,translate&display=block" />
     <style>
         html,
         body {
@@ -688,7 +688,7 @@
         const OVERLAYS = [
             {
                 id: 'roads',
-                icon: 'add_road',
+                icon: 'road',
                 source: rasterSource(
                     ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}'],
                     19,
@@ -699,7 +699,7 @@
                 // cyclosm-lite = CyclOSM's transparent overlay (cycle lanes, tracks, paths) without the base map.
                 id: 'cyclosm',
                 icon: 'directions_bike',
-                badge: 'add_road',
+                badge: 'road',
                 source: rasterSource(
                     subdomainTiles('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm-lite/{z}/{x}/{y}.png'),
                     19,
