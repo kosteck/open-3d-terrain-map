@@ -4,13 +4,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>About, licences and terms – Open 3D Terrain Map</title>
+    <title>About this map – Open 3D Terrain Map</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
     <meta name="theme-color" content="#1a73e8" />
-    <meta name="description" content="Licences, data sources, terms of use and privacy of Open 3D Terrain Map." />
+    <meta name="description" content="Why Open 3D Terrain Map exists, plus its licences, data sources, terms of use and privacy." />
     <style>
         :root {
             --text: #222;
@@ -74,6 +74,12 @@
 
         a {
             color: var(--accent);
+        }
+
+        .subtitle {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 15px;
         }
 
         .updated {
@@ -170,13 +176,22 @@
             <header class="page-header">
                 <div class="brand">
                     <img src="assets/favicon.svg" alt="Open 3D Terrain Map logo" />
-                    <h1>About, licences and terms of use</h1>
+                    <div>
+                        <h1>About this map</h1>
+                        <p class="subtitle">Licences, terms of use and privacy</p>
+                    </div>
                 </div>
                 <button type="button" id="language-switch-en" class="language-switch" data-target="pl">Polski</button>
             </header>
-            <p class="updated">Last updated: 18 October 2026</p>
+            <p class="updated">Last updated: 19 October 2026</p>
 
             <h2>About this project</h2>
+            <p>I kept coming across great open maps – <a href="https://mapterhorn.com">Mapterhorn</a>, <a
+                    href="https://www.openrailwaymap.org">OpenRailwayMap</a>, <a
+                    href="https://opentopomap.org">OpenTopoMap</a>, <a href="https://www.cyclosm.org">CyclOSM</a> and many
+                more – but I couldn't find a single place that had them all at hand. So I made one for myself.</p>
+            <p>All the credit goes to the people and volunteers behind these projects; this map just puts their work side
+                by side.</p>
             <p>Open 3D Terrain Map is a hobby, non-commercial visualisation of open map and elevation data.
                 The source code is available on <a href="https://github.com/kosteck/open-3d-terrain-map">GitHub</a>
                 under the <a href="https://github.com/kosteck/open-3d-terrain-map/blob/main/LICENSE">MIT licence</a>. The
@@ -341,13 +356,22 @@
             <header class="page-header">
                 <div class="brand">
                     <img src="assets/favicon.svg" alt="Logo Open 3D Terrain Map" />
-                    <h1>O mapie, licencje i warunki użycia</h1>
+                    <div>
+                        <h1>O mapie</h1>
+                        <p class="subtitle">Licencje, warunki użycia i prywatność</p>
+                    </div>
                 </div>
                 <button type="button" id="language-switch-pl" class="language-switch" data-target="en">English</button>
             </header>
-            <p class="updated">Ostatnia aktualizacja: 18 października 2026</p>
+            <p class="updated">Ostatnia aktualizacja: 19 października 2026</p>
 
             <h2>O projekcie</h2>
+            <p>Świetnych otwartych map jest mnóstwo – <a href="https://mapterhorn.com">Mapterhorn</a>, <a
+                    href="https://www.openrailwaymap.org">OpenRailwayMap</a>, <a
+                    href="https://opentopomap.org">OpenTopoMap</a>, <a href="https://www.cyclosm.org">CyclOSM</a> i wiele
+                innych – ale brakowało mi jednego miejsca, w którym wszystkie są pod ręką, więc zrobiłem je sobie.</p>
+            <p>To zasługa ludzi i wolontariuszy, którzy tworzą te projekty; ta mapa tylko zestawia ich pracę
+                obok siebie.</p>
             <p>Open 3D Terrain Map to hobbystyczna, niekomercyjna wizualizacja otwartych danych mapowych i wysokościowych.
                 Kod źródłowy jest dostępny na <a
                     href="https://github.com/kosteck/open-3d-terrain-map">GitHubie</a> na <a
@@ -529,8 +553,8 @@
                 article.hidden = article.dataset.language !== language;
             });
             document.title = language === 'pl'
-                ? 'O mapie, licencje i warunki – Open 3D Terrain Map'
-                : 'About, licences and terms – Open 3D Terrain Map';
+                ? 'O mapie – Open 3D Terrain Map'
+                : 'About this map – Open 3D Terrain Map';
             // Keep the language when going back to the map.
             document.querySelectorAll('.back-link').forEach((link) => {
                 link.href = `./#lang=${language}`;
