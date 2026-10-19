@@ -9,6 +9,7 @@
     <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
+    <script src="assets/open3dterrainmap-detect-browser-language.js"></script>
     <meta name="theme-color" content="#1a73e8" />
     <meta name="description" content="Why Open 3D Terrain Map exists, plus its licences, data sources, terms of use and privacy." />
     <style>
@@ -540,13 +541,10 @@
 
     <script>
         // Same language rules as the app: #lang=… (set when the app links here) > browser language > English.
-        const LANGUAGES = ['en', 'pl'];
-
+        // SITE_LANGUAGES and detectSiteBrowserLanguage() come from assets/open3dterrainmap-detect-browser-language.js.
         function detectLanguage() {
             const fromHash = new URLSearchParams(window.location.hash.slice(1)).get('lang');
-            if (LANGUAGES.includes(fromHash)) return fromHash;
-            const preferred = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
-            return preferred.toLowerCase().startsWith('pl') ? 'pl' : 'en';
+            return SITE_LANGUAGES.includes(fromHash) ? fromHash : detectSiteBrowserLanguage();
         }
 
         function showLanguage(language) {
@@ -557,9 +555,10 @@
             document.title = language === 'pl'
                 ? 'O mapie – Open 3D Terrain Map'
                 : 'About this map – Open 3D Terrain Map';
-            // Keep the language when going back to the map.
+            // Keep the language when going back to the map. The app treats lang= in its URL as a manual choice and
+            // keeps it in every link the user later shares, so pass it only when it differs from the browser's.
             document.querySelectorAll('.back-link').forEach((link) => {
-                link.href = `./#lang=${language}`;
+                link.href = language === detectSiteBrowserLanguage() ? './' : `./#lang=${language}`;
             });
         }
 

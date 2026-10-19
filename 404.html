@@ -9,6 +9,7 @@
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <script src="/assets/open3dterrainmap-detect-browser-language.js"></script>
     <meta name="theme-color" content="#1a73e8" />
     <meta name="robots" content="noindex" />
     <style>
@@ -86,9 +87,8 @@
     </main>
 
     <script>
-        // Same rule as the app: Polish for browsers preferring Polish, otherwise English.
-        const preferred = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
-        const language = preferred.toLowerCase().startsWith('pl') ? 'pl' : 'en';
+        // Same rule as the app (detectSiteBrowserLanguage from assets/open3dterrainmap-detect-browser-language.js).
+        const language = detectSiteBrowserLanguage();
         document.documentElement.lang = language;
         document.querySelectorAll('article[data-language]').forEach((article) => {
             article.hidden = article.dataset.language !== language;
