@@ -1080,11 +1080,20 @@
         // --- Panel ---
 
         // Layer buttons exist before the style finishes loading; clicks made that early are queued until it does.
+        // Not map.isStyleLoaded(): that is also false while any tiles are loading, and 'style.load' fires only
+        // once, so clicks made during tile loading were queued forever.
+        let isStyleReady = false;
+        const callbacksWaitingForStyle = [];
+        map.once('style.load', () => {
+            isStyleReady = true;
+            callbacksWaitingForStyle.splice(0).forEach((callback) => callback());
+        });
+
         function whenStyleReady(callback) {
-            if (map.isStyleLoaded()) {
+            if (isStyleReady) {
                 callback();
             } else {
-                map.once('style.load', callback);
+                callbacksWaitingForStyle.push(callback);
             }
         }
 
@@ -1098,20 +1107,29 @@
 
         // Keeps the button's spinner until every source it switched on has its visible tiles loaded
         // (failed tiles count as settled, e.g. contour 404s outside high-res DEM regions).
+        // A newer click on the same button replaces its watcher, so an older one can't clear a newer spinner.
+        const stopLoadingWatcherByButton = new Map();
+
         function showButtonLoadingUntilSourcesLoaded(button, sourceIds) {
+            stopLoadingWatcherByButton.get(button)?.();
             if (button.getAttribute('aria-pressed') !== 'true' || sourceIds.length === 0) {
                 setButtonLoading(button, false);
                 return;
             }
             const startedAt = Date.now();
+            const stopWatching = () => {
+                map.off('render', checkSourcesLoaded);
+                map.off('idle', checkSourcesLoaded);
+                stopLoadingWatcherByButton.delete(button);
+            };
             const checkSourcesLoaded = () => {
                 const isSettled = sourceIds.every((sourceId) => map.isSourceLoaded(sourceId))
                     || Date.now() - startedAt > BUTTON_LOADING_TIMEOUT_MS;
                 if (!isSettled) return;
                 setButtonLoading(button, false);
-                map.off('render', checkSourcesLoaded);
-                map.off('idle', checkSourcesLoaded);
+                stopWatching();
             };
+            stopLoadingWatcherByButton.set(button, stopWatching);
             map.on('render', checkSourcesLoaded);
             map.on('idle', checkSourcesLoaded);
         }
